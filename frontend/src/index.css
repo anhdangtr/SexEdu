@@ -1,111 +1,263 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+    /* SafeSpace Health Theme - Warm Teal */
+    --background: 160 20% 97%;
+    --foreground: 170 30% 12%;
+
+    --card: 160 15% 99%;
+    --card-foreground: 170 30% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 170 30% 12%;
+
+    --primary: 172 50% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 168 30% 92%;
+    --secondary-foreground: 172 40% 20%;
+
+    --muted: 160 15% 93%;
+    --muted-foreground: 170 10% 45%;
+
+    --accent: 172 45% 88%;
+    --accent-foreground: 172 50% 20%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 168 20% 88%;
+    --input: 168 20% 88%;
+    --ring: 172 50% 36%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 160 18% 96%;
+    --sidebar-foreground: 170 20% 25%;
+    --sidebar-primary: 172 50% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 168 25% 92%;
+    --sidebar-accent-foreground: 172 40% 20%;
+    --sidebar-border: 168 18% 90%;
+    /* Slightly darker sidebar text for better contrast */
+    --sidebar-foreground: 170 20% 18%;
+    --sidebar-ring: 172 50% 36%;
+
+    /* Custom tokens */
+    --chat-user: 172 45% 92%;
+    --chat-ai: 0 0% 100%;
+    --chat-user-foreground: 172 40% 18%;
+    --chat-ai-foreground: 170 25% 15%;
+    --surface-warm: 30 30% 96%;
+    --mode-indicator: 172 50% 36%;
+    --switch-track: 172 35% 75%;
+    /* Typography - use Plus Jakarta Sans for a modern geometric sans look */
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    --font-heading: 'Plus Jakarta Sans', 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  .disguise-mode {
+    /* EduSolve Math Theme - Deep Navy */
+    --background: 222 25% 10%;
+    --foreground: 220 15% 90%;
+
+    --card: 222 22% 14%;
+    --card-foreground: 220 15% 90%;
+
+    --popover: 222 22% 14%;
+    --popover-foreground: 220 15% 90%;
+
+    --primary: 215 60% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 222 18% 20%;
+    --secondary-foreground: 220 15% 85%;
+
+    --muted: 222 15% 18%;
+    --muted-foreground: 220 10% 55%;
+
+    --accent: 215 40% 25%;
+    --accent-foreground: 215 50% 80%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 222 15% 22%;
+    --input: 222 15% 22%;
+    --ring: 215 60% 52%;
+
+    --sidebar-background: 222 28% 8%;
+    --sidebar-foreground: 220 12% 75%;
+    --sidebar-primary: 215 60% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 18% 16%;
+    --sidebar-accent-foreground: 215 50% 80%;
+    --sidebar-border: 222 18% 18%;
+    /* Brighter sidebar foreground for dark/disguise mode */
+    --sidebar-foreground: 220 12% 88%;
+    --sidebar-ring: 215 60% 52%;
+
+    --chat-user: 215 40% 22%;
+    --chat-ai: 222 22% 16%;
+    --chat-user-foreground: 215 50% 85%;
+    --chat-ai-foreground: 220 15% 88%;
+    --surface-warm: 222 20% 12%;
+    --mode-indicator: 215 60% 52%;
+    --switch-track: 215 40% 45%;
   }
 }
 
-body {
-  margin: 0;
-}
+@layer base {
+  * {
+    @apply border-border;
+  }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    /* Slightly larger base for better readability */
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: light dark;
+  }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
+  /* Headings use an elegant serif for a more unique and refined look */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.02em;
+    color: hsl(var(--foreground));
+    line-height: 1.12;
+    font-weight: 600;
+  }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+  /* Monospace used for math/code lines */
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  /* Subtle elevation for cards and chat bubbles */
+  .bg-chat-user {
+    box-shadow: 0 8px 22px rgba(16,24,40,0.06);
+    background-color: hsl(var(--chat-user));
+    color: hsl(var(--chat-user-foreground));
+  }
+
+  .bg-primary, .bg-card {
+    box-shadow: 0 6px 18px rgba(16,24,40,0.04);
+  }
+
+  /* Slightly larger, more legible text for chat content */
+  .text-sm { font-size: 0.98rem; }
+
+  /* Global form and control styles */
+  button, input, textarea, select {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    outline: none;
+  }
+
+  textarea::placeholder, input::placeholder {
+    color: hsl(var(--muted-foreground) / 0.9);
+  }
+
+  textarea:focus, input:focus {
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    border-color: hsl(var(--ring));
+  }
+
+  /* Polished chat bubble styles */
+  .chat-bubble {
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 8px 20px rgba(16,24,40,0.04);
+  }
+
+  .user-bubble {
+    background-color: hsl(var(--chat-user));
+    color: hsl(var(--chat-user-foreground));
+  }
+
+  .assistant-bubble {
+    background-color: hsl(var(--chat-ai));
+    color: hsl(var(--chat-ai-foreground));
+  }
+
+  .chat-avatar {
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background-color: hsl(var(--primary) / 0.08);
+    color: hsl(var(--primary));
+    box-shadow: 0 6px 18px rgba(16,24,40,0.04);
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+
+@layer utilities {
+  .mode-transition {
+    transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
   }
-}
-p {
-  margin: 0;
-}
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
+  .blur-switch {
+    animation: blurSwitch 400ms ease;
+  }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  @keyframes blurSwitch {
+    0% { filter: blur(0px); opacity: 1; }
+    40% { filter: blur(8px); opacity: 0.6; }
+    60% { filter: blur(8px); opacity: 0.6; }
+    100% { filter: blur(0px); opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slideIn 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.35);
+    border-radius: 999px;
+  }
 }
