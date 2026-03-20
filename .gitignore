@@ -11,8 +11,8 @@ dist/
 build/
 
 # Local env files
-.env
-.env.local
+Backend/.env
+Backend/.env.local
 
 # Vite/Node types
 frontend/node_modules/
