@@ -11,33 +11,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const SAFE_RESPONSES: Record<string, string> = {
-  default: `### 1. Explanation
-Cảm ơn bạn đã hỏi! Đây là một câu hỏi rất tốt. Mình sẽ giải đáp một cách khoa học và dễ hiểu nhất.
-
-### 2. Why It Matters
-Việc hiểu rõ về cơ thể và sức khỏe giúp bạn tự tin hơn, biết cách bảo vệ bản thân và đưa ra những quyết định đúng đắn.
-
-### 3. Guidance & Advice
-- Hãy tìm một người lớn mà bạn tin tưởng để trao đổi thêm
-- Nhớ rằng mọi câu hỏi đều đáng được giải đáp
-- Bạn có thể quay lại đây bất cứ lúc nào`,
-};
-
-const MATH_RESPONSES: Record<string, string> = {
-  default: `### 1. Mathematical Breakdown
-Đây là một bài toán thú vị. Hãy cùng giải từng bước:
-
-$\\text{Bước 1: Xác định dữ kiện}$
-$\\text{Bước 2: Áp dụng công thức}$
-$\\text{Bước 3: Tính toán kết quả}$
-
-### 2. Real-world Application
-Khái niệm toán học này được ứng dụng rộng rãi trong kỹ thuật, vật lý và khoa học dữ liệu.
-
-### 3. Practice Tip
-Thử giải thêm các bài tương tự để nắm vững kiến thức. Hãy thay đổi các hệ số để luyện tập.`,
-};
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+const CHAT_ENDPOINT = `${API_BASE_URL}/api/chat`;
 
 export const ChatView = () => {
   const { mode, isTransitioning, currentMessages, addMessage, toggleMode } = useMode();
@@ -57,7 +32,6 @@ export const ChatView = () => {
     scrollToBottom();
   }, [currentMessages.length, scrollToBottom]);
 
-  // Show skeleton during transition
   useEffect(() => {
     if (isTransitioning) {
       setShowSkeleton(true);
@@ -67,17 +41,43 @@ export const ChatView = () => {
     }
   }, [isTransitioning]);
 
-  const handleSend = (text: string) => {
+  const handleSend = async (text: string) => {
     addMessage({ role: "user", content: text });
     setIsTyping(true);
-    setTimeout(() => {
-      const responses = mode === "safe" ? SAFE_RESPONSES : MATH_RESPONSES;
-      addMessage({ role: "assistant", content: responses.default });
+
+    try {
+      const response = await fetch(CHAT_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: text,
+          mode,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const data: { reply?: string } = await response.json();
+
+      addMessage({
+        role: "assistant",
+        content: data.reply?.trim() || "Mình chưa nhận được phản hồi hợp lệ từ hệ thống.",
+      });
+    } catch (error) {
+      console.error("Failed to fetch chat reply:", error);
+      addMessage({
+        role: "assistant",
+        content: "Mình chưa kết nối được tới backend. Hãy kiểm tra server và thử lại.",
+      });
+    } finally {
       setIsTyping(false);
-    }, 1200);
+    }
   };
 
-  // Keyboard shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "m") {
@@ -93,7 +93,6 @@ export const ChatView = () => {
 
   const chatContent = (
     <div className="flex flex-1 flex-col min-w-0 min-h-0">
-      {/* Top bar */}
       <header className="flex items-center justify-between border-b border-border px-4 py-2.5 mode-transition bg-card/80 backdrop-blur-sm shrink-0">
         <div className="flex items-center gap-2">
           {isMobile && (
@@ -116,7 +115,6 @@ export const ChatView = () => {
         <ModeSwitch />
       </header>
 
-      {/* Chat area */}
       <div className={`flex flex-1 overflow-hidden min-h-0 ${isTransitioning ? "blur-switch" : ""}`}>
         <div className="flex flex-1 flex-col min-w-0 min-h-0">
           <div ref={scrollRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-6">
@@ -147,8 +145,14 @@ export const ChatView = () => {
                     </div>
                     <div className="flex items-center gap-1 pt-2">
                       <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" />
-                      <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" style={{ animationDelay: "150ms" }} />
-                      <span className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse" style={{ animationDelay: "300ms" }} />
+                      <span
+                        className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse"
+                        style={{ animationDelay: "150ms" }}
+                      />
+                      <span
+                        className="h-2 w-2 rounded-full bg-muted-foreground/40 animate-pulse"
+                        style={{ animationDelay: "300ms" }}
+                      />
                     </div>
                   </div>
                 )}
@@ -156,7 +160,6 @@ export const ChatView = () => {
             )}
           </div>
 
-          {/* Floating input */}
           <div className="px-4 py-3 shrink-0">
             <div className="mx-auto max-w-[800px]">
               <ChatInput onSend={handleSend} disabled={isTyping} />
@@ -164,7 +167,6 @@ export const ChatView = () => {
           </div>
         </div>
 
-        {/* Right sidebar — math tools, desktop only, toggleable */}
         {isMathMode && showRightSidebar && !isMobile && (
           <div className="w-72 border-l border-border bg-card/50 overflow-y-auto mode-transition animate-slide-in shrink-0">
             <MathSidebar />
@@ -176,12 +178,10 @@ export const ChatView = () => {
 
   return (
     <div className={`flex h-screen w-full mode-transition ${isMathMode ? "disguise-mode" : ""} bg-background`}>
-      {/* Left sidebar — desktop */}
       {!isMobile && <AppSidebar />}
 
       {chatContent}
 
-      {/* Right sidebar toggle — math mode only */}
       {isMathMode && !isMobile && (
         <button
           onClick={() => setShowRightSidebar((v) => !v)}

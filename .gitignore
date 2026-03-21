@@ -12,6 +12,7 @@ build/
 
 # Local env files
 Backend/.env
+Backend/.env.example
 Backend/.env.local
 
 # Vite/Node types
