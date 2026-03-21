@@ -49,7 +49,7 @@ export const WelcomeScreen = ({ onPromptClick }: WelcomeScreenProps) => {
             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50/80 border border-rose-100 mb-6 shadow-sm shrink-0 w-fit">
                 <Sparkles className="h-3.5 w-3.5 text-rose-500 animate-pulse" />
                 <span className="text-[10px] font-chakra font-bold uppercase tracking-[0.25em] text-rose-500 whitespace-nowrap">
-                    Xaxi AI Pro v2.0
+                    Sase AI Pro v2.0
                 </span>
             </div>
 
