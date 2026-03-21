@@ -3,15 +3,12 @@ import { useMode } from "@/contexts/ModeContext";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { WelcomeScreen } from "./WelcomeScreen";
-import { ModeSwitch } from "./ModeSwitch";
 import { AppSidebar } from "./AppSidebar";
 import { MathSidebar } from "./MathSidebar";
-import { Menu, PanelRightOpen, PanelRightClose, Info } from "lucide-react";
+import { Menu, PanelRightOpen, PanelRightClose, Sparkles, Ghost } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Skeleton } from "@/components/ui/skeleton";
 
-// Cấu hình API Endpoint
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
 const CHAT_ENDPOINT = `${API_BASE_URL}/api/chat`;
 
@@ -19,136 +16,105 @@ export const ChatView = () => {
     const { mode, isTransitioning, currentMessages, addMessage, toggleMode } = useMode();
     const [isTyping, setIsTyping] = useState(false);
     const [showRightSidebar, setShowRightSidebar] = useState(false);
-    const [showSkeleton, setShowSkeleton] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
-
     const isMathMode = mode === "disguise";
 
-    // Tự động cuộn xuống cuối đoạn chat
-    const scrollToBottom = useCallback(() => {
-        setTimeout(() => {
-            if (scrollRef.current) {
-                scrollRef.current.scrollTo({
-                    top: scrollRef.current.scrollHeight,
-                    behavior: "smooth"
-                });
-            }
-        }, 100);
-    }, []);
+    // --- LOGIC SWITCH MODE BÍ MẬT ---
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [currentMessages.length, isTyping, scrollToBottom]);
-
-    // Hiệu ứng Skeleton khi chuyển Mode
-    useEffect(() => {
-        if (isTransitioning) {
-            setShowSkeleton(true);
-        } else {
-            const t = setTimeout(() => setShowSkeleton(false), 300);
-            return () => clearTimeout(t);
-        }
-    }, [isTransitioning]);
-
-    // Phím tắt Ctrl + M để chuyển mode bí mật
-    useEffect(() => {
-        const handler = (e: KeyboardEvent) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === "m") {
+        const handleGlobalDoubleClick = () => toggleMode();
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'h') {
                 e.preventDefault();
                 toggleMode();
             }
         };
-        window.addEventListener("keydown", handler);
-        return () => window.removeEventListener("keydown", handler);
-    }, [toggleMode]);
+        const resetInactivityTimer = () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+            if (mode === "safe") {
+                timerRef.current = setTimeout(() => toggleMode(), 30000);
+            }
+        };
+        window.addEventListener("dblclick", handleGlobalDoubleClick);
+        window.addEventListener("keydown", handleKeyDown);
+        const interactionEvents = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
+        interactionEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
+        resetInactivityTimer();
+        return () => {
+            window.removeEventListener("dblclick", handleGlobalDoubleClick);
+            window.removeEventListener("keydown", handleKeyDown);
+            if (timerRef.current) clearTimeout(timerRef.current);
+            interactionEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+        };
+    }, [mode, toggleMode]);
 
-    // Xử lý gửi tin nhắn (Kết nối API Backend)
+    const scrollToBottom = useCallback(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+        }
+    }, []);
+
+    useEffect(() => { scrollToBottom(); }, [currentMessages.length, isTyping, scrollToBottom]);
+
     const handleSend = async (text: string) => {
         addMessage({ role: "user", content: text });
         setIsTyping(true);
-
         try {
             const response = await fetch(CHAT_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: text, mode }),
             });
-
-            if (!response.ok) throw new Error("Kết nối server thất bại");
-
-            const data: { reply?: string } = await response.json();
-            addMessage({
-                role: "assistant",
-                content: data.reply?.trim() || "Xin lỗi, mình không nhận được phản hồi.",
-            });
+            if (!response.ok) throw new Error("Server error");
+            const data = await response.json();
+            addMessage({ role: "assistant", content: data.reply?.trim() || "Sase đang hơi 'đơ', thử lại nhé!" });
         } catch (error) {
-            console.error("Lỗi:", error);
-            // Fallback nếu chưa có backend (để bạn demo)
-            const fallbackMsg = mode === "safe"
-                ? "Kết nối của bạn được bảo mật. EduSolve đang lắng nghe..."
-                : "Hệ thống đang tính toán kết quả bài toán này.";
-            addMessage({ role: "assistant", content: fallbackMsg });
-        } finally {
-            setIsTyping(false);
-        }
+            addMessage({ role: "assistant", content: isMathMode ? "Sase đang bận tính toán vũ trụ." : "Sóng yếu quá, Sase chưa nghe rõ." });
+        } finally { setIsTyping(false); }
     };
 
-    return (
-        <div className={`flex h-screen w-full mode-transition ${isMathMode ? "disguise-mode bg-slate-50" : "bg-background"} overflow-hidden font-sans`}>
-            {/* Sidebar bên trái (Desktop) */}
-            {!isMobile && <AppSidebar />}
+    const handleStop = () => setIsTyping(false);
 
+    return (
+        <div className={`flex h-screen w-full transition-colors duration-1000 overflow-hidden font-sans ${isMathMode ? "bg-rose-50/20" : "bg-rose-50/10"}`}>
+            {!isMobile && <AppSidebar />}
             <div className="flex flex-1 flex-col min-w-0 relative h-full">
-                {/* 1. HEADER CHUYÊN NGHIỆP */}
-                <header className="flex items-center justify-between border-b px-4 py-3 bg-card/95 backdrop-blur-md z-30 shrink-0">
-                    <div className="flex items-center gap-2">
+                <header className="flex h-16 items-center justify-between border-b border-rose-100/50 px-6 bg-white/70 backdrop-blur-xl z-30 shrink-0">
+                    <div className="flex items-center gap-3">
                         {isMobile && (
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <button className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground transition-colors">
+                                    <button className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500 transition-all active:scale-90">
                                         <Menu className="h-5 w-5" />
                                     </button>
                                 </SheetTrigger>
-                                <SheetContent side="left" className="p-0 w-[280px]">
-                                    <SheetTitle className="sr-only">Menu</SheetTitle>
-                                    <AppSidebar />
-                                </SheetContent>
+                                <SheetContent side="left" className="p-0 w-[280px]"><AppSidebar /></SheetContent>
                             </Sheet>
                         )}
-                        <span className="text-[10px] font-black tracking-[0.2em] text-muted-foreground/50 uppercase select-none">
-                            {isMathMode ? "Academic AI System" : "Privacy Secure Chat"}
-                        </span>
+                        <div className="flex flex-col min-w-[150px] h-10 justify-center">
+                            <span className="text-2xl font-outfit font-black tracking-widest bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent uppercase select-none leading-none">Sase</span>
+                            <div className="relative h-3 mt-1 overflow-hidden">
+                                <span className={`absolute inset-0 text-[8px] font-bold text-rose-400/60 uppercase tracking-[0.25em] transition-all duration-700 ${isMathMode ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}>Privacy Secure Chat</span>
+                                <span className={`absolute inset-0 text-[8px] font-bold text-rose-400/60 uppercase tracking-[0.25em] transition-all duration-700 ${isMathMode ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"}`}>Academic AI System</span>
+                            </div>
+                        </div>
                     </div>
-                    <ModeSwitch />
                 </header>
 
-                {/* 2. KHU VỰC NỘI DUNG CHAT */}
                 <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
-                    <div
-                        ref={scrollRef}
-                        className={`flex-1 overflow-y-auto scrollbar-none transition-all duration-500 
-                            ${isTransitioning ? "blur-md opacity-40 scale-[0.99]" : "blur-0 opacity-100 scale-100"}`}
-                    >
-                        <div className="mx-auto max-w-[800px] w-full px-4">
-                            {showSkeleton ? (
-                                <div className="space-y-8 py-10">
-                                    <Skeleton className="h-20 w-full rounded-2xl" />
-                                    <Skeleton className="h-32 w-3/4 rounded-2xl" />
-                                    <Skeleton className="h-24 w-1/2 rounded-2xl" />
-                                </div>
-                            ) : currentMessages.length === 0 ? (
-                                <div className="min-h-[80vh] flex items-center justify-center pb-20">
-                                    <WelcomeScreen onPromptClick={handleSend} />
-                                </div>
+                    <div ref={scrollRef} className={`flex-1 overflow-y-auto scrollbar-none transition-all duration-700 font-chakra ${isTransitioning ? "opacity-30 blur-sm" : "opacity-100 blur-0"}`}>
+                        <div className="mx-auto max-w-[850px] w-full px-6">
+                            {currentMessages.length === 0 ? (
+                                <div className="min-h-[80vh] flex items-center justify-center pb-20"><WelcomeScreen onPromptClick={handleSend} /></div>
                             ) : (
-                                <div className="space-y-6 py-10 pb-44">
-                                    {currentMessages.map((msg, i) => (
-                                        <ChatMessage key={msg.id || i} role={msg.role} content={msg.content} index={i} />
-                                    ))}
+                                <div className="space-y-6 py-10 pb-52">
+                                    {currentMessages.map((msg, i) => <ChatMessage key={msg.id || i} role={msg.role} content={msg.content} index={i} />)}
                                     {isTyping && (
-                                        <div className="flex gap-2 p-4 bg-muted/20 rounded-2xl w-fit animate-pulse text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                                            AI đang phân tích dữ liệu...
+                                        <div className="flex items-center gap-3 p-5 bg-white/60 border border-rose-100 rounded-[2rem] w-fit animate-pulse mb-10 shadow-sm">
+                                            <div className="flex gap-1.5"><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce"></div></div>
+                                            <span className="text-[11px] font-chakra font-bold text-rose-500/80 uppercase tracking-widest">Sase đang 'vắt óc' suy nghĩ...</span>
                                         </div>
                                     )}
                                 </div>
@@ -156,38 +122,29 @@ export const ChatView = () => {
                         </div>
                     </div>
 
-                    {/* 3. VÙNG NHẬP LIỆU (FLOATING) */}
-                    <div className="absolute bottom-0 left-0 right-0 z-20 px-4 py-8 bg-gradient-to-t from-background via-background/90 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 z-20 px-4 py-8 bg-gradient-to-t from-rose-50/90 via-rose-50/40 to-transparent backdrop-blur-[2px]">
                         <div className="mx-auto max-w-[800px]">
-                            <ChatInput onSend={handleSend} disabled={isTyping} />
+                            <ChatInput onSend={handleSend} disabled={isTyping} isGenerating={isTyping} onStop={handleStop} />
 
-                            <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground/30 select-none">
-                                <Info className="h-3 w-3" />
-                                <p className="text-[9px] font-black tracking-widest uppercase text-center italic">
-                                    EduSolve AI v2.0 • Ẩn danh & Bảo mật tuyệt đối • Phản hồi có thể nhầm lẫn
+                            {/* DÒNG FOOTER DÍ DỎM MỚI */}
+                            <div className="mt-6 flex items-center justify-center gap-2 text-rose-500/40 select-none">
+                                <Sparkles className={`h-3.5 w-3.5 transition-transform duration-1000 ${isTransitioning ? "rotate-180 scale-125" : "rotate-0 scale-100"}`} />
+                                <p className="text-[9px] font-chakra font-bold tracking-[0.05em] uppercase text-center italic max-w-[600px] leading-relaxed">
+                                    Sase là một AI "đa hệ"—vừa giỏi giải toán vừa thạo gỡ rối tơ lòng. <br />
+                                    Nhưng thỉnh thoảng Sase cũng biết "ảo thuật" biến đúng thành sai để thử lòng bạn, nhớ check lại nha!
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Nút bật/tắt Sidebar Toán học (Bên phải) */}
                 {isMathMode && !isMobile && (
-                    <button
-                        onClick={() => setShowRightSidebar((v) => !v)}
-                        className="fixed bottom-32 right-8 z-40 flex h-10 w-10 items-center justify-center rounded-xl bg-card border shadow-xl text-muted-foreground hover:text-primary transition-all active:scale-90"
-                    >
-                        {showRightSidebar ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+                    <button onClick={() => setShowRightSidebar((v) => !v)} className="fixed bottom-36 right-8 z-40 flex h-12 w-12 items-center justify-center rounded-2xl bg-white border border-rose-200 shadow-2xl text-rose-500 hover:bg-rose-500 hover:text-white transition-all active:scale-90">
+                        {showRightSidebar ? <PanelRightClose className="h-5 w-5" /> : <PanelRightOpen className="h-5 w-5" />}
                     </button>
                 )}
             </div>
-
-            {/* Sidebar Toán học (Chỉ hiện ở mode Disguise) */}
-            {isMathMode && showRightSidebar && !isMobile && (
-                <div className="w-[320px] border-l bg-card/50 backdrop-blur-md overflow-y-auto animate-slide-in shrink-0">
-                    <MathSidebar />
-                </div>
-            )}
+            {isMathMode && showRightSidebar && !isMobile && <div className="w-[340px] border-l border-rose-100 bg-white/40 backdrop-blur-2xl overflow-y-auto animate-in slide-in-from-right shrink-0"><MathSidebar /></div>}
         </div>
     );
 };
