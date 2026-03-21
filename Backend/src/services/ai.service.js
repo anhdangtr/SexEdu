@@ -20,7 +20,7 @@ const finalizeReply = async ({ userMessage, reply, source, intent }) => {
 export const processMessage = async (message, mode) => {
   const trimmedMessage = String(message ?? "").trim();
   if (!trimmedMessage) {
-    return "Hay nhap noi dung cau hoi truoc khi gui.";
+    return "Please enter a question before sending.";
   }
 
   const intent = detectIntent(trimmedMessage);

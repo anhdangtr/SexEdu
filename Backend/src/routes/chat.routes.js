@@ -5,4 +5,4 @@ const router = express.Router();
 
 router.post("/", handleChat);
 
-export default router; // ✅ QUAN TRỌNG
+export default router; // Important

@@ -34,6 +34,23 @@ const RULE_DEFINITIONS = [
       /\b(explicit|porn|fetish)\b/i,
     ],
   },
+  {
+    tag: "victim_support",
+    score: -4,
+    action: "allow",
+    tests: [
+      /\b(i was raped|i am raped|i was assaulted|i was abused|bi hiep dam|bi xam hai|bi cuong hiep)\b/i,
+    ],
+  },
+  {
+    tag: "victim_support",
+    score: -3,
+    action: "allow",
+    tests: [
+      /\b(help|safe|safety|what should i do|can you help|ho tro|giup|lam gi)\b/i,
+      /\b(rape|assault|abuse|hiep dam|xam hai|cuong hiep)\b/i,
+    ],
+  },
 ];
 
 export const runInputRuleGuardrail = (normalizedMessage) => {
