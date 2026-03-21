@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { useMode } from "../contexts/ModeContext";
-
-// 1. IMPORT LOGO CỦA BẠN (Đảm bảo đúng đường dẫn)
 import logoUrl from "@/assets/logo.svg";
 
-// --- Icons Mini ---
 const Svg = ({ children, className, ...props }: any) => (
     <svg className={className} width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" {...props}>
         {children}
@@ -21,7 +18,6 @@ export const AppSidebar = () => {
     const isSafe = mode === "safe";
     const sessions = isSafe ? safeSessions : disguiseSessions;
 
-    // --- Elegant Rose Theme ---
     const theme = {
         primary: "bg-rose-500 shadow-xl shadow-rose-200",
         text: "text-rose-600",
@@ -34,16 +30,13 @@ export const AppSidebar = () => {
 
     return (
         <div className={`flex h-full w-[290px] flex-col transition-all duration-700 ease-in-out border-r shadow-[20px_0_40px_rgba(0,0,0,0.02)] ${theme.bg}`}>
-
-            {/* 1. HEADER & LOGO: Đã phóng to lên 72px và bo tròn hoàn thiện */}
             <div className="group px-8 pt-10 pb-8 flex items-center gap-5 cursor-pointer" onDoubleClick={toggleMode}>
                 <div className="relative shrink-0 transition-transform duration-500 group-hover:scale-105 group-active:scale-95">
-                    {/* KHUNG TRÒN: Nâng kích thước lên 72px để logo to rõ hơn */}
                     <div className="h-[72px] w-[72px] rounded-full border-2 border-rose-100 bg-white shadow-md flex items-center justify-center overflow-hidden">
                         <img
                             src={logoUrl}
                             alt="Sase Logo"
-                            className="h-full w-full object-cover" // Giúp logo lấp đầy khung tròn mà không bị méo
+                            className="h-full w-full object-cover"
                         />
                     </div>
                 </div>
@@ -55,31 +48,28 @@ export const AppSidebar = () => {
                 </div>
             </div>
 
-            {/* 2. ACTION BUTTON - Floating Modern Style */}
             <div className="px-6 mb-8">
                 <button onClick={newChat} className={`group flex w-full items-center justify-between rounded-[1.25rem] px-5 py-4 text-[13px] font-bold text-white transition-all hover:brightness-105 hover:-translate-y-0.5 active:scale-95 ${theme.primary}`}>
                     <div className="flex items-center gap-3">
                         <div className="bg-white/20 p-1 rounded-lg">
                             <Plus className="h-4 w-4 stroke-[3.5px]" />
                         </div>
-                        <span className="tracking-wide">Trò chuyện mới</span>
+                        <span className="tracking-wide">New chat</span>
                     </div>
                     <ChevronRight className="h-4 w-4 opacity-40 group-hover:translate-x-1 transition-transform" />
                 </button>
             </div>
 
-            {/* 3. SECTION LABEL */}
             <div className="px-8 mb-4 flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Hội thoại gần đây</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Recent conversations</span>
                 <div className="h-[1px] flex-1 ml-4 bg-gradient-to-r from-rose-100/50 to-transparent" />
             </div>
 
-            {/* 4. SESSIONS LIST - Clean & Smooth */}
             <div className="flex-1 overflow-y-auto px-4 space-y-2 scrollbar-none">
                 {sessions.length === 0 ? (
                     <div className="mt-10 flex flex-col items-center py-12 border border-dashed border-rose-100 rounded-[2rem] opacity-20 mx-4">
                         <MessageSquare className="h-6 w-6 mb-2" />
-                        <p className="text-[9px] font-black uppercase tracking-widest">Trống lịch sử</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest">No history yet</p>
                     </div>
                 ) : (
                     sessions.map((session) => {
@@ -115,27 +105,25 @@ export const AppSidebar = () => {
                 )}
             </div>
 
-            {/* 5. FOOTER CARD - Premium Glassmorphism */}
             <div className="px-6 py-8">
                 <div className={`rounded-[2.5rem] p-6 border transition-all duration-500 ${theme.glass} shadow-sm`}>
                     <div className="flex items-center gap-3 mb-4">
-                        {/* KHUNG TRÒN MINI: Tăng nhẹ lên h-11 w-11 */}
                         <div className="p-1.5 h-11 w-11 bg-rose-50 rounded-full border border-rose-100 shadow-inner flex items-center justify-center overflow-hidden">
                             <img
                                 src={logoUrl}
-                                alt="Mini Logo"
+                                alt="Mini logo"
                                 className="h-full w-full object-cover rounded-full"
                             />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-800 font-outfit">Hệ thống Sase</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-800 font-outfit">Sase System</span>
                             <div className="h-0.5 w-4 bg-rose-400 mt-0.5 rounded-full" />
                         </div>
                     </div>
                     <p className="text-[10px] leading-[1.6] text-slate-500 font-bold tracking-tight opacity-70">
                         {isSafe
-                            ? "Dữ liệu được mã hóa đa lớp và bảo vệ bởi nhân thuật toán Sase Secure."
-                            : "Đang truy xuất cơ sở dữ liệu học thuật Academic AI để tối ưu bài toán."}
+                            ? "Your data is protected with layered safeguards and the Sase Secure system."
+                            : "Academic resources are being used to support math problem solving."}
                     </p>
                 </div>
             </div>

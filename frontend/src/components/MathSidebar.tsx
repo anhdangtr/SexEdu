@@ -1,18 +1,15 @@
 import { useState } from "react";
 import {
-    Calculator, Sigma, Variable, FunctionSquare,
-    Divide, Equal, Delete, Sparkles, Binary, Copy
+    Calculator, Sigma, Binary, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Hằng số Toán học
 const MATH_CONSTANTS = [
-    { name: "Số Pi", symbol: "π", value: "3.14159..." },
-    { name: "Số Euler", symbol: "e", value: "2.71828..." },
-    { name: "Tỷ lệ vàng", symbol: "φ", value: "1.61803..." },
+    { name: "Pi", symbol: "π", value: "3.14159..." },
+    { name: "Euler's number", symbol: "e", value: "2.71828..." },
+    { name: "Golden ratio", symbol: "φ", value: "1.61803..." },
 ];
 
-// Các phím máy tính nâng cao
 const ADVANCED_BUTTONS = [
     "sin", "cos", "tan", "√",
     "x²", "log", "π", "e",
@@ -22,7 +19,6 @@ const ADVANCED_BUTTONS = [
     "0", ".", "=", "+"
 ];
 
-// Ký hiệu toán học chuyên sâu để tham khảo
 const MATH_SYMBOLS = ["∞", "∫", "∑", "∆", "≈", "≠", "≤", "≥", "∂", "∇"];
 
 export const MathSidebar = () => {
@@ -72,8 +68,6 @@ export const MathSidebar = () => {
 
     return (
         <div className="flex flex-col gap-6 p-5 animate-in slide-in-from-right duration-700 h-full font-chakra">
-
-            {/* 1. ACADEMIC CALCULATOR */}
             <div className="rounded-3xl border border-rose-100 bg-white/60 p-4 shadow-xl shadow-rose-100/20 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-4 px-1">
                     <div className="flex items-center gap-2">
@@ -111,7 +105,6 @@ export const MathSidebar = () => {
                 </div>
             </div>
 
-            {/* 2. MATHEMATICAL CONSTANTS */}
             <div className="space-y-3">
                 <div className="flex items-center gap-2 px-1">
                     <Binary className="h-4 w-4 text-rose-400" />
@@ -132,7 +125,6 @@ export const MathSidebar = () => {
                 </div>
             </div>
 
-            {/* 3. SYMBOL PALETTE */}
             <div className="space-y-3">
                 <div className="flex items-center gap-2 px-1">
                     <Sigma className="h-4 w-4 text-rose-400" />
@@ -147,13 +139,12 @@ export const MathSidebar = () => {
                 </div>
             </div>
 
-            {/* 4. ACADEMIC BADGE FOOTER */}
             <div className="mt-auto pt-6 border-t border-rose-100/20">
                 <div className="p-4 rounded-[2rem] bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-xl shadow-rose-200 relative overflow-hidden group">
                     <Sparkles className="absolute -top-1 -right-1 h-12 w-12 text-white/10 group-hover:scale-150 transition-transform duration-1000" />
                     <div className="relative z-10">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-1">Xaxi Academic</p>
-                        <p className="text-[11px] font-medium leading-relaxed italic opacity-95">"Toán học là ngôn ngữ của vũ trụ."</p>
+                        <p className="text-[11px] font-medium leading-relaxed italic opacity-95">"Mathematics is the language of the universe."</p>
                     </div>
                 </div>
             </div>

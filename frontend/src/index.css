@@ -1,4 +1,4 @@
-﻿/* Import fonts chuyên nghiệp với đầy đủ độ dày */
+/* Import the full font set used by the app */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
@@ -7,7 +7,7 @@
 
 @layer base {
     :root {
-        /* Safe Mode: Trắng sáng tinh khiết */
+        /* Safe Mode: clean light palette */
         --background: 0 0% 98%;
         --foreground: 170 30% 12%;
         --card: 0 0% 100%;
@@ -38,9 +38,9 @@
         --sidebar-ring: 172 50% 36%;
     }
 
-    /* Math Mode (Disguise): Màu kem cực nhẹ, gần sát màu trắng để tránh gây chú ý */
+    /* Math Mode (Disguise): very light cream palette that stays close to white */
     .disguise-mode {
-        --background: 40 20% 97%; /* Màu kem rất nhạt */
+        --background: 40 20% 97%; /* Very light cream */
         --card: 40 20% 98%;
         --sidebar-background: 40 15% 95%;
         --border: 40 10% 90%;
@@ -52,13 +52,13 @@
     }
 
     body {
-        /* Ép font Plus Jakarta Sans toàn diện */
+        /* Apply Plus Jakarta Sans consistently */
         @apply bg-background text-foreground antialiased;
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     }
 
-    /* Đồng nhất style cho Header bar */
+    /* Keep the header styling consistent */
     header {
         background-color: hsl(var(--card) / 0.9) !important;
         backdrop-filter: blur(8px);

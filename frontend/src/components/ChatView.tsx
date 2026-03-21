@@ -92,9 +92,9 @@ export const ChatView = () => {
             });
             if (!response.ok) throw new Error("Server error");
             const data = await response.json();
-            addMessage({ role: "assistant", content: data.reply?.trim() || "Sase dang hoi 'do', thu lai nhe!" });
+            addMessage({ role: "assistant", content: data.reply?.trim() || "Sase is thinking through that. Please try again." });
         } catch (error) {
-            addMessage({ role: "assistant", content: isMathMode ? "Sase dang ban tinh toan vu tru." : "Song yeu qua, Sase chua nghe ro." });
+            addMessage({ role: "assistant", content: isMathMode ? "Sase is busy crunching the numbers." : "Sase could not hear that clearly. Please try again." });
         } finally {
             setIsTyping(false);
         }
@@ -139,7 +139,7 @@ export const ChatView = () => {
                                     {isTyping && (
                                         <div className="flex items-center gap-3 p-5 bg-white/60 border border-rose-100 rounded-[2rem] w-fit animate-pulse mb-10 shadow-sm">
                                             <div className="flex gap-1.5"><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce"></div></div>
-                                            <span className="text-[11px] font-chakra font-bold text-rose-500/80 uppercase tracking-widest">Sase dang 'vat oc' suy nghi...</span>
+                                            <span className="text-[11px] font-chakra font-bold text-rose-500/80 uppercase tracking-widest">Sase is thinking...</span>
                                         </div>
                                     )}
                                 </div>
@@ -154,8 +154,8 @@ export const ChatView = () => {
                             <div className="mt-6 flex items-center justify-center gap-2 text-rose-500/40 select-none">
                                 <Sparkles className={`h-3.5 w-3.5 transition-transform duration-1000 ${isTransitioning ? "rotate-180 scale-125" : "rotate-0 scale-100"}`} />
                                 <p className="text-[9px] font-chakra font-bold tracking-[0.05em] uppercase text-center italic max-w-[600px] leading-relaxed">
-                                    Sase la mot AI "da he", vua gioi giai toan vua thao go roi to long. <br />
-                                    Nhung thinh thoang Sase cung biet "ao thuat" bien dung thanh sai de thu long ban, nho check lai nha!
+                                    Sase is a playful AI that can switch between academic help and private support. <br />
+                                    It can still make mistakes sometimes, so please double-check important answers.
                                 </p>
                             </div>
                         </div>
