@@ -9,7 +9,13 @@ import { Menu, PanelRightOpen, PanelRightClose, Sparkles, Ghost } from "lucide-r
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/$/, "");
+// 1. Chỉ khai báo MỘT LẦN duy nhất
+const API_BASE_URL = (
+    import.meta.env.VITE_API_BASE_URL ?? // Ưu tiên biến môi trường từ file .env
+    (import.meta.env.DEV ? "" : "https://sase-90am.onrender.com") // Nếu không có .env: Dev dùng local, Prod dùng Render
+).replace(/\/$/, ""); // Xử lý xóa dấu gạch chéo thừa ở cuối
+
+// 2. Sử dụng biến đã khai báo
 const CHAT_ENDPOINT = `${API_BASE_URL}/api/chat`;
 
 export const ChatView = () => {
