@@ -1,56 +1,171 @@
-import { useEffect, useRef } from "react";
-import { useMode } from "@/contexts/ModeContext";
-import { Accessibility, Shield, Sigma } from "lucide-react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 
-export const ModeSwitch = () => {
-    const { mode, toggleMode } = useMode();
-    const isSafe = mode === "safe";
+export type AppMode = "safe" | "disguise";
 
-    const timerRef = useRef<NodeJS.Timeout | null>(null);
+interface Message {
+    id: string;
+    role: "user" | "assistant";
+    content: string;
+    timestamp: Date;
+}
 
-    useEffect(() => {
-        const handleGlobalDoubleClick = () => toggleMode();
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'h') {
-                e.preventDefault();
-                toggleMode();
-            }
-        };
+interface ChatSession {
+    id: string;
+    title: string;
+    messages: Message[];
+    createdAt: Date;
+    mode: AppMode;
+}
 
-        const resetInactivityTimer = () => {
-            if (timerRef.current) clearTimeout(timerRef.current);
-            if (mode === "safe") {
-                timerRef.current = setTimeout(() => toggleMode(), 30000);
-            }
-        };
+interface ModeContextType {
+    mode: AppMode;
+    toggleMode: () => void;
+    isTransitioning: boolean;
+    currentMessages: Message[];
+    addMessage: (msg: Omit<Message, "id" | "timestamp">) => void;
+    // Chat history
+    safeSessions: ChatSession[];
+    disguiseSessions: ChatSession[];
+    currentSessionId: string | null;
+    newChat: () => void;
+    selectSession: (id: string) => void;
+    deleteSession: (id: string) => void;
+    renameSession: (id: string, title: string) => void;
+}
 
-        window.addEventListener("dblclick", handleGlobalDoubleClick);
-        const interactionEvents = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
-        interactionEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
-        window.addEventListener("keydown", handleKeyDown);
+const ModeContext = createContext<ModeContextType | null>(null);
 
-        resetInactivityTimer();
+export const useMode = () => {
+    const ctx = useContext(ModeContext);
+    if (!ctx) throw new Error("useMode must be used within a ModeProvider");
+    return ctx;
+};
 
-        return () => {
-            window.removeEventListener("dblclick", handleGlobalDoubleClick);
-            if (timerRef.current) clearTimeout(timerRef.current);
-            interactionEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [mode, toggleMode]);
+function createSession(mode: AppMode): ChatSession {
+    return {
+        id: crypto.randomUUID(),
+        // Updated to professional English default title
+        title: "New Conversation",
+        messages: [],
+        createdAt: new Date(),
+        mode,
+    };
+}
+
+export const ModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [mode, setMode] = useState<AppMode>("safe");
+    const [isTransitioning, setIsTransitioning] = useState(false);
+
+    const [safeSessions, setSafeSessions] = useState<ChatSession[]>([createSession("safe")]);
+    const [disguiseSessions, setDisguiseSessions] = useState<ChatSession[]>([createSession("disguise")]);
+    const [safeCurrentId, setSafeCurrentId] = useState<string>(safeSessions[0].id);
+    const [disguiseCurrentId, setDisguiseCurrentId] = useState<string>(disguiseSessions[0].id);
+
+    const currentSessionId = mode === "safe" ? safeCurrentId : disguiseCurrentId;
+    const sessions = mode === "safe" ? safeSessions : disguiseSessions;
+    // Note: setSessions and setCurrentId are derived during render for internal logic if needed
+
+    const currentSession = sessions.find((s) => s.id === currentSessionId);
+    const currentMessages = currentSession?.messages ?? [];
+
+    const toggleMode = useCallback(() => {
+        setIsTransitioning(true);
+        setTimeout(() => {
+            setMode((m) => (m === "safe" ? "disguise" : "safe"));
+            setTimeout(() => setIsTransitioning(false), 200);
+        }, 200);
+    }, []);
+
+    const addMessage = useCallback(
+        (msg: Omit<Message, "id" | "timestamp">) => {
+            const newMsg: Message = {
+                ...msg,
+                id: crypto.randomUUID(),
+                timestamp: new Date(),
+            };
+            const updateSessions = mode === "safe" ? setSafeSessions : setDisguiseSessions;
+            const curId = mode === "safe" ? safeCurrentId : disguiseCurrentId;
+
+            updateSessions((prev) =>
+                prev.map((s) => {
+                    if (s.id !== curId) return s;
+                    const updated = { ...s, messages: [...s.messages, newMsg] };
+                    // Auto-title from first user message
+                    if (msg.role === "user" && s.messages.length === 0) {
+                        updated.title = msg.content.slice(0, 40) + (msg.content.length > 40 ? "..." : "");
+                    }
+                    return updated;
+                })
+            );
+        },
+        [mode, safeCurrentId, disguiseCurrentId]
+    );
+
+    const newChat = useCallback(() => {
+        const session = createSession(mode);
+        if (mode === "safe") {
+            setSafeSessions((p) => [session, ...p]);
+            setSafeCurrentId(session.id);
+        } else {
+            setDisguiseSessions((p) => [session, ...p]);
+            setDisguiseCurrentId(session.id);
+        }
+    }, [mode]);
+
+    const selectSession = useCallback(
+        (id: string) => {
+            if (mode === "safe") setSafeCurrentId(id);
+            else setDisguiseCurrentId(id);
+        },
+        [mode]
+    );
+
+    const deleteSession = useCallback(
+        (id: string) => {
+            const updateSessions = mode === "safe" ? setSafeSessions : setDisguiseSessions;
+            const setCurId = mode === "safe" ? setSafeCurrentId : setDisguiseCurrentId;
+
+            updateSessions((prev) => {
+                const filtered = prev.filter((s) => s.id !== id);
+                if (filtered.length === 0) {
+                    const fresh = createSession(mode);
+                    setCurId(fresh.id);
+                    return [fresh];
+                }
+                const curId = mode === "safe" ? safeCurrentId : disguiseCurrentId;
+                if (curId === id) setCurId(filtered[0].id);
+                return filtered;
+            });
+        },
+        [mode, safeCurrentId, disguiseCurrentId]
+    );
+
+    const renameSession = useCallback(
+        (id: string, title: string) => {
+            const updateSessions = mode === "safe" ? setSafeSessions : setDisguiseSessions;
+            updateSessions((prev) => prev.map((s) => (s.id === id ? { ...s, title } : s)));
+        },
+        [mode]
+    );
 
     return (
-        <button
-            onClick={toggleMode}
-            className="group flex items-center gap-2 rounded-full bg-rose-50/80 border border-rose-100/50 px-3 py-1.5 text-xs text-rose-500 hover:bg-white hover:shadow-lg hover:shadow-rose-100 transition-all active:scale-95 shadow-sm"
-            title="Switch Mode (DblClick / Ctrl+Shift+H)"
+        <ModeContext.Provider
+            value={{
+                mode,
+                toggleMode,
+                isTransitioning,
+                currentMessages,
+                addMessage,
+                safeSessions,
+                disguiseSessions,
+                currentSessionId,
+                newChat,
+                selectSession,
+                deleteSession,
+                renameSession,
+            }}
         >
-            {isSafe ? <Shield className="h-3.5 w-3.5" /> : <Sigma className="h-3.5 w-3.5" />}
-            <div className={`h-4 w-8 rounded-full relative transition-colors duration-500 ${isSafe ? "bg-rose-200" : "bg-rose-500"}`}>
-                <div
-                    className={`absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-md transition-all duration-500 ease-in-out ${isSafe ? "left-0.5" : "left-4.5"}`}
-                />
-            </div>
-        </button>
+            {children}
+        </ModeContext.Provider>
     );
 };

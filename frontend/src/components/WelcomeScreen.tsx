@@ -2,7 +2,7 @@ import { useMode } from "@/contexts/ModeContext";
 import { cn } from "@/lib/utils";
 import React from "react";
 
-// --- Hệ thống Icons Inline (Đảm bảo hiển thị 100% không lỗi) ---
+// --- Inline Icon System ---
 const Svg = ({ children, className, ...props }: any) => (
     <svg className={className} width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
         {children}
@@ -23,17 +23,17 @@ interface WelcomeScreenProps {
 }
 
 const SAFE_PROMPTS = [
-    { icon: Heart, text: "Sức khỏe tâm thần", desc: "Cách cân bằng cảm xúc và giảm áp lực?", color: "text-rose-500", bg: "bg-rose-50" },
-    { icon: Lock, text: "Trao đổi nhạy cảm", desc: "Cách mở lời với người thân về vấn đề khó nói.", color: "text-pink-500", bg: "bg-pink-50" },
-    { icon: Shield, text: "Mối quan hệ", desc: "Dấu hiệu của một mối quan hệ lành mạnh.", color: "text-fuchsia-500", bg: "bg-fuchsia-50" },
-    { icon: Sparkles, text: "Lời khuyên cá nhân", desc: "Làm sao để tự tin hơn vào bản thân?", color: "text-rose-400", bg: "bg-rose-50/50" },
+    { icon: Heart, text: "Mental Well-being", desc: "How to balance emotions and manage stress?", color: "text-rose-500", bg: "bg-rose-50" },
+    { icon: Lock, text: "Sensitive Dialogue", desc: "Approaching difficult conversations with loved ones.", color: "text-pink-500", bg: "bg-pink-50" },
+    { icon: Shield, text: "Healthy Dynamics", desc: "Identifying green flags in modern relationships.", color: "text-fuchsia-500", bg: "bg-fuchsia-50" },
+    { icon: Sparkles, text: "Personal Empowerment", desc: "Strategies to build long-term self-confidence.", color: "text-rose-400", bg: "bg-rose-50/50" },
 ];
 
 const MATH_PROMPTS = [
-    { icon: Brain, text: "Giải phương trình", desc: "Giải nhanh phương trình: x² - 5x + 6 = 0", color: "text-rose-500", bg: "bg-rose-50" },
-    { icon: TrendingUp, text: "Đạo hàm & Tích phân", desc: "Tính đạo hàm hàm số phức hợp f(x)", color: "text-pink-500", bg: "bg-pink-50" },
-    { icon: Sigma, text: "Định lý toán học", desc: "Giải thích định lý Pythagoras và ứng dụng.", color: "text-fuchsia-500", bg: "bg-fuchsia-50" },
-    { icon: Zap, text: "Mẹo giải nhanh", desc: "Các hằng đẳng thức đáng nhớ thường dùng.", color: "text-rose-400", bg: "bg-rose-50/50" },
+    { icon: Brain, text: "Equation Solver", desc: "Solve: x² - 5x + 6 = 0 with step-by-step logic.", color: "text-rose-500", bg: "bg-rose-50" },
+    { icon: TrendingUp, text: "Calculus & Analysis", desc: "Compute the derivative of complex functions.", color: "text-pink-500", bg: "bg-pink-50" },
+    { icon: Sigma, text: "Theoretical Principles", desc: "Explain Pythagorean theorem and its applications.", color: "text-fuchsia-500", bg: "bg-fuchsia-50" },
+    { icon: Zap, text: "Rapid Optimization", desc: "Quick methods for solving algebraic identities.", color: "text-rose-400", bg: "bg-rose-50/50" },
 ];
 
 export const WelcomeScreen = ({ onPromptClick }: WelcomeScreenProps) => {
@@ -42,34 +42,33 @@ export const WelcomeScreen = ({ onPromptClick }: WelcomeScreenProps) => {
     const prompts = isSafe ? SAFE_PROMPTS : MATH_PROMPTS;
 
     return (
-        /* Giảm mt-32 xuống mt-12 để các element gần nhau hơn */
         <div className="flex flex-col items-center w-full max-w-5xl mx-auto animate-in fade-in duration-700 mt-12 px-6">
 
-            {/* 1. Badge: Giảm mb-16 xuống mb-6 */}
+            {/* 1. Version Badge */}
             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-rose-50/80 border border-rose-100 mb-6 shadow-sm shrink-0 w-fit">
                 <Sparkles className="h-3.5 w-3.5 text-rose-500 animate-pulse" />
                 <span className="text-[10px] font-chakra font-bold uppercase tracking-[0.25em] text-rose-500 whitespace-nowrap">
-                    Sase AI Pro v2.0
+                    Sase AI Intelligence v2.0
                 </span>
             </div>
 
-            {/* 2. Hero Section: Giảm mb-20 xuống mb-8 và min-h xuống 120px */}
+            {/* 2. Hero Section */}
             <div className="text-center mb-8 font-chakra w-full min-h-[120px] flex flex-col items-center justify-center">
                 <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-foreground mb-4 leading-tight whitespace-nowrap transition-all duration-500 uppercase">
                     {isSafe ? (
-                        <span>Chào bạn! Tôi có thể <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent font-black">giúp</span> gì?</span>
+                        <span>Hello! How can I <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent font-black">assist</span> you?</span>
                     ) : (
-                        <span>Hệ thống <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent font-black">Giải toán</span> chuyên sâu</span>
+                        <span>Advanced <span className="bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent font-black">Academic</span> Intelligence</span>
                     )}
                 </h1>
-                <p className="text-muted-foreground text-[10px] md:text-xs font-medium opacity-60 font-sans whitespace-nowrap tracking-widest uppercase">
+                <p className="text-muted-foreground text-[10px] md:text-xs font-medium opacity-60 font-sans whitespace-nowrap tracking-[0.15em] uppercase">
                     {isSafe
-                        ? "Không gian riêng tư để bạn khám phá và nhận lời khuyên khoa học nhất."
-                        : "Sẵn sàng hỗ trợ bạn chinh phục mọi bài toán khó từ đại số đến hình học."}
+                        ? "A secure space for evidence-based insights and personal growth."
+                        : "Empowering your academic journey with high-precision problem solving."}
                 </p>
             </div>
 
-            {/* 3. Grid Prompts: Giảm mb-24 xuống mb-10 */}
+            {/* 3. Grid Prompts */}
             <div className="grid w-full gap-4 sm:grid-cols-2 px-2 mb-10">
                 {prompts.map((p, i) => (
                     <button
@@ -81,26 +80,26 @@ export const WelcomeScreen = ({ onPromptClick }: WelcomeScreenProps) => {
                             <p.icon className="h-4 w-4" />
                         </div>
                         <div className="min-w-0">
-                            <h3 className="font-chakra font-bold text-foreground text-[13px] leading-tight mb-0.5 uppercase tracking-wide truncate">{p.text}</h3>
+                            <h3 className="font-chakra font-bold text-foreground text-[12px] leading-tight mb-0.5 uppercase tracking-wide truncate">{p.text}</h3>
                             <p className="text-[10px] text-muted-foreground line-clamp-1 opacity-60 font-sans italic">{p.desc}</p>
                         </div>
                     </button>
                 ))}
             </div>
 
-            {/* 4. Footer Features: Giảm padding và gap */}
-            <div className="flex items-center gap-8 py-6 border-t border-rose-100/20 w-full justify-center">
+            {/* 4. Professional Footer Features */}
+            <div className="flex items-center gap-10 py-6 border-t border-rose-100/20 w-full justify-center">
                 <div className="flex items-center gap-2 text-rose-500/30 hover:text-rose-500/60 transition-colors cursor-default">
                     <Shield className="h-4 w-4" />
-                    <span className="text-[9px] font-chakra font-bold uppercase tracking-[0.2em]">Bảo mật</span>
+                    <span className="text-[9px] font-chakra font-bold uppercase tracking-[0.2em]">End-to-End Encryption</span>
                 </div>
                 <div className="flex items-center gap-2 text-rose-500/30 hover:text-rose-500/60 transition-colors cursor-default">
                     <Zap className="h-4 w-4" />
-                    <span className="text-[9px] font-chakra font-bold uppercase tracking-[0.2em]">Xử lý nhanh</span>
+                    <span className="text-[9px] font-chakra font-bold uppercase tracking-[0.2em]">Instant Intelligence</span>
                 </div>
                 <div className="flex items-center gap-2 text-rose-500/30 hover:text-rose-500/60 transition-colors cursor-default">
                     <Info className="h-4 w-4" />
-                    <span className="text-[9px] font-chakra font-bold uppercase tracking-[0.2em]">Chính xác</span>
+                    <span className="text-[9px] font-chakra font-bold uppercase tracking-[0.2em]">High-Precision Logic</span>
                 </div>
             </div>
         </div>
