@@ -1,5 +1,4 @@
 ﻿/* Import fonts chuyên nghiệp với đầy đủ độ dày */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,6 +6,8 @@
 
 @layer base {
     :root {
+        --font-sans: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        --font-mono: Consolas, "Liberation Mono", "Courier New", monospace;
         /* Safe Mode: Trắng sáng tinh khiết */
         --background: 0 0% 98%;
         --foreground: 170 30% 12%;
@@ -52,9 +53,8 @@
     }
 
     body {
-        /* Ép font Plus Jakarta Sans toàn diện */
         @apply bg-background text-foreground antialiased;
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-family: var(--font-sans);
         font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     }
 

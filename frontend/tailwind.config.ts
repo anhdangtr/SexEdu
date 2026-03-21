@@ -20,9 +20,9 @@ export default {
         extend: {
             fontFamily: {
                 // Thiết lập Plus Jakarta Sans làm font sans-serif mặc định
-                sans: ["'Plus Jakarta Sans'", "ui-sans-serif", "system-ui", "sans-serif"],
+                sans: ["Segoe UI", "Helvetica Neue", "Arial", "sans-serif"],
                 // Giữ lại JetBrains Mono cho các thành phần tính toán/code
-                mono: ["'JetBrains Mono'", "ui-monospace", "SFMono-Regular", "monospace"],
+                mono: ["Consolas", "Liberation Mono", "Courier New", "monospace"],
             },
             colors: {
                 border: "hsl(var(--border))",
