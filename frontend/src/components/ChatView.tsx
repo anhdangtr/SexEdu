@@ -9,13 +9,29 @@ import { Menu, PanelRightOpen, PanelRightClose, Sparkles, Ghost } from "lucide-r
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// 1. Chỉ khai báo MỘT LẦN duy nhất
-const API_BASE_URL = (
-    import.meta.env.VITE_API_BASE_URL ?? // Ưu tiên biến môi trường từ file .env
-    (import.meta.env.DEV ? "" : "https://sase-90am.onrender.com") // Nếu không có .env: Dev dùng local, Prod dùng Render
-).replace(/\/$/, ""); // Xử lý xóa dấu gạch chéo thừa ở cuối
+const normalizeApiBaseUrl = (value?: string) => {
+    if (!value) {
+        return value ?? "";
+    }
 
-// 2. Sử dụng biến đã khai báo
+    const trimmed = value.trim();
+
+    if (trimmed.startsWith("ttps://")) {
+        return `h${trimmed}`.replace(/\/$/, "");
+    }
+
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("/")) {
+        return trimmed.replace(/\/$/, "");
+    }
+
+    return `https://${trimmed}`.replace(/\/$/, "");
+};
+
+const API_BASE_URL = normalizeApiBaseUrl(
+    import.meta.env.VITE_API_BASE_URL ??
+    (import.meta.env.DEV ? "" : "https://sase-90am.onrender.com")
+);
+
 const CHAT_ENDPOINT = `${API_BASE_URL}/api/chat`;
 
 export const ChatView = () => {
@@ -26,13 +42,12 @@ export const ChatView = () => {
     const isMobile = useIsMobile();
     const isMathMode = mode === "disguise";
 
-    // --- LOGIC SWITCH MODE BÍ MẬT ---
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const handleGlobalDoubleClick = () => toggleMode();
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'h') {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "h") {
                 e.preventDefault();
                 toggleMode();
             }
@@ -46,13 +61,13 @@ export const ChatView = () => {
         window.addEventListener("dblclick", handleGlobalDoubleClick);
         window.addEventListener("keydown", handleKeyDown);
         const interactionEvents = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
-        interactionEvents.forEach(event => window.addEventListener(event, resetInactivityTimer));
+        interactionEvents.forEach((event) => window.addEventListener(event, resetInactivityTimer));
         resetInactivityTimer();
         return () => {
             window.removeEventListener("dblclick", handleGlobalDoubleClick);
             window.removeEventListener("keydown", handleKeyDown);
             if (timerRef.current) clearTimeout(timerRef.current);
-            interactionEvents.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+            interactionEvents.forEach((event) => window.removeEventListener(event, resetInactivityTimer));
         };
     }, [mode, toggleMode]);
 
@@ -62,7 +77,9 @@ export const ChatView = () => {
         }
     }, []);
 
-    useEffect(() => { scrollToBottom(); }, [currentMessages.length, isTyping, scrollToBottom]);
+    useEffect(() => {
+        scrollToBottom();
+    }, [currentMessages.length, isTyping, scrollToBottom]);
 
     const handleSend = async (text: string) => {
         addMessage({ role: "user", content: text });
@@ -75,10 +92,12 @@ export const ChatView = () => {
             });
             if (!response.ok) throw new Error("Server error");
             const data = await response.json();
-            addMessage({ role: "assistant", content: data.reply?.trim() || "Sase đang hơi 'đơ', thử lại nhé!" });
+            addMessage({ role: "assistant", content: data.reply?.trim() || "Sase dang hoi 'do', thu lai nhe!" });
         } catch (error) {
-            addMessage({ role: "assistant", content: isMathMode ? "Sase đang bận tính toán vũ trụ." : "Sóng yếu quá, Sase chưa nghe rõ." });
-        } finally { setIsTyping(false); }
+            addMessage({ role: "assistant", content: isMathMode ? "Sase dang ban tinh toan vu tru." : "Song yeu qua, Sase chua nghe ro." });
+        } finally {
+            setIsTyping(false);
+        }
     };
 
     const handleStop = () => setIsTyping(false);
@@ -120,7 +139,7 @@ export const ChatView = () => {
                                     {isTyping && (
                                         <div className="flex items-center gap-3 p-5 bg-white/60 border border-rose-100 rounded-[2rem] w-fit animate-pulse mb-10 shadow-sm">
                                             <div className="flex gap-1.5"><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div><div className="h-2 w-2 bg-rose-400 rounded-full animate-bounce"></div></div>
-                                            <span className="text-[11px] font-chakra font-bold text-rose-500/80 uppercase tracking-widest">Sase đang 'vắt óc' suy nghĩ...</span>
+                                            <span className="text-[11px] font-chakra font-bold text-rose-500/80 uppercase tracking-widest">Sase dang 'vat oc' suy nghi...</span>
                                         </div>
                                     )}
                                 </div>
@@ -132,12 +151,11 @@ export const ChatView = () => {
                         <div className="mx-auto max-w-[800px]">
                             <ChatInput onSend={handleSend} disabled={isTyping} isGenerating={isTyping} onStop={handleStop} />
 
-                            {/* DÒNG FOOTER DÍ DỎM MỚI */}
                             <div className="mt-6 flex items-center justify-center gap-2 text-rose-500/40 select-none">
                                 <Sparkles className={`h-3.5 w-3.5 transition-transform duration-1000 ${isTransitioning ? "rotate-180 scale-125" : "rotate-0 scale-100"}`} />
                                 <p className="text-[9px] font-chakra font-bold tracking-[0.05em] uppercase text-center italic max-w-[600px] leading-relaxed">
-                                    Sase là một AI "đa hệ"—vừa giỏi giải toán vừa thạo gỡ rối tơ lòng. <br />
-                                    Nhưng thỉnh thoảng Sase cũng biết "ảo thuật" biến đúng thành sai để thử lòng bạn, nhớ check lại nha!
+                                    Sase la mot AI "da he", vua gioi giai toan vua thao go roi to long. <br />
+                                    Nhung thinh thoang Sase cung biet "ao thuat" bien dung thanh sai de thu long ban, nho check lai nha!
                                 </p>
                             </div>
                         </div>
