@@ -1,167 +1,169 @@
-import { useState } from "react";
-import { useMode } from "@/contexts/ModeContext";
+import React, { useState } from "react";
+import { useMode } from "../contexts/ModeContext";
 import {
-  Plus,
-  MessageSquare,
-  Pencil,
-  Trash2,
-  Settings,
-  Shield,
-  Sigma,
-  Check,
-  X,
+    Plus,
+    MessageSquare,
+    Pencil,
+    Trash2,
+    Settings,
+    Shield,
+    Sigma,
+    Check,
+    Compass,
+    BookOpen,
+    Sparkles,
+    Ghost, // Icon tượng trưng cho sự ẩn danh
+    Info
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const AppSidebar = () => {
-  const {
-    mode,
-    currentSessionId,
-    newChat,
-    selectSession,
-    deleteSession,
-    renameSession,
-  } = useMode();
+    const {
+        mode,
+        currentSessionId,
+        newChat,
+        selectSession,
+        deleteSession,
+        renameSession,
+        toggleMode,
+        safeSessions,
+        disguiseSessions
+    } = useMode();
 
-  const isSafe = mode === "safe";
-  const { safeSessions, disguiseSessions } = useMode();
-  const sessions = isSafe ? safeSessions : disguiseSessions;
+    const isSafe = mode === "safe";
+    const sessions = isSafe ? safeSessions : disguiseSessions;
 
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editText, setEditText] = useState("");
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editText, setEditText] = useState("");
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  const startEdit = (id: string, title: string) => {
-    setEditingId(id);
-    setEditText(title);
-  };
+    const startEdit = (id: string, title: string) => {
+        setEditingId(id);
+        setEditText(title);
+    };
 
-  const confirmEdit = () => {
-    if (editingId && editText.trim()) {
-      renameSession(editingId, editText.trim());
-    }
-    setEditingId(null);
-  };
+    const confirmEdit = () => {
+        if (editingId && editText.trim()) {
+            renameSession(editingId, editText.trim());
+        }
+        setEditingId(null);
+    };
 
-  return (
-    // Add a clean sans-serif base and slightly larger base text for readability
-    <div className="flex h-full w-[260px] flex-col bg-sidebar mode-transition border-r border-sidebar-border font-sans text-sm">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 pt-5 pb-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary/15">
-          {isSafe ? (
-            <Shield className="h-4 w-4 text-sidebar-primary" />
-          ) : (
-            <Sigma className="h-4 w-4 text-sidebar-primary" />
-          )}
-        </div>
-        <span className="text-base font-semibold text-sidebar-foreground tracking-tight">
-          {isSafe ? "SafeSpace" : "EduSolve"}
-        </span>
-      </div>
+    return (
+        <div className={`flex h-full w-[280px] flex-col mode-transition border-r transition-all duration-500 select-none bg-sidebar-background border-sidebar-border text-sidebar-foreground`}>
 
-      {/* New Chat */}
-      <div className="px-3 py-3">
-        <button
-          onClick={newChat}
-          className="flex w-full items-center gap-2.5 rounded-xl border border-transparent bg-sidebar-accent/80 px-3 py-2.5 text-sm font-medium text-sidebar-foreground hover:bg-sidebar-accent/100 active:scale-[0.97] transition-all"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="font-medium text-sm">{isSafe ? "Cuộc trò chuyện mới" : "Phiên học mới"}</span>
-        </button>
-      </div>
-
-      {/* History Label */}
-      <div className="px-4 mb-1">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
-          {isSafe ? "Lịch sử riêng tư" : "Lịch sử học tập"}
-        </span>
-      </div>
-
-      {/* Sessions List */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin px-2 space-y-0.5">
-        {sessions.map((session) => {
-          const isActive = session.id === currentSessionId;
-          const isEditing = editingId === session.id;
-          const isHovered = hoveredId === session.id;
-
-          return (
+            {/* Header: Logo & Chuyển Mode bí mật */}
             <div
-              key={session.id}
-              onMouseEnter={() => setHoveredId(session.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors min-w-0 ${
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-inner ring-1 ring-sidebar-accent/40"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-              }`}
-              onClick={() => !isEditing && selectSession(session.id)}
+                className="group/logo flex items-center justify-between px-5 pt-7 pb-4 cursor-pointer"
+                onDoubleClick={toggleMode}
+                title="Double click để chuyển đổi chế độ riêng tư"
             >
-              <MessageSquare className="h-4 w-4 shrink-0 opacity-60" />
-              {isEditing ? (
-                <div className="flex flex-1 items-center gap-2 min-w-0">
-                  <input
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && confirmEdit()}
-                    className="flex-1 min-w-0 bg-transparent text-sm text-sidebar-foreground outline-none border-b border-sidebar-primary/40 py-1"
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <button onClick={(e) => { e.stopPropagation(); confirmEdit(); }} className="p-1 hover:text-sidebar-primary rounded">
-                    <Check className="h-4 w-4" />
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="p-1 hover:text-destructive rounded">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <span className={`flex-1 truncate text-[13px] ${isActive ? 'font-medium text-sidebar-foreground' : ''}`}>{session.title}</span>
-                  {(isHovered || isActive) && (
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); startEdit(session.id, session.title); }}
-                        className="p-1 rounded hover:bg-sidebar-border/50 transition-colors"
-                        aria-label="Edit session"
-                      >
-                        <Pencil className="h-4 w-4 opacity-80" />
-                      </button>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}
-                        className="p-1 rounded hover:bg-destructive/20 hover:text-destructive transition-colors"
-                        aria-label="Delete session"
-                      >
-                        <Trash2 className="h-4 w-4 opacity-80" />
-                      </button>
+                <div className="flex items-center gap-3">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-lg transition-all duration-500 group-active/logo:scale-90 bg-sidebar-primary`}>
+                        <Shield className="h-5 w-5 text-white" />
                     </div>
-                  )}
-                </>
-              )}
+                    <div className="flex flex-col">
+                        <span className="text-sm font-black tracking-tight text-foreground/80 uppercase">
+                            EduSolve AI
+                        </span>
+                        <span className={`text-[10px] font-bold text-sidebar-primary`}>
+                            PRIVATE MODE
+                        </span>
+                    </div>
+                </div>
             </div>
-          );
-        })}
-      </div>
 
-      {/* User Profile */}
-      <div className="border-t border-sidebar-border px-3 py-3">
-        <div className="flex items-center gap-2.5">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-sidebar-primary/15 text-sidebar-primary text-xs font-semibold">
-              A
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">Alex</p>
-            <p className="text-[11px] text-sidebar-foreground/60">
-              {isSafe ? "Chế độ riêng tư" : "Chế độ học tập"}
-            </p>
-          </div>
-          <button className="p-1.5 rounded-lg hover:bg-sidebar-accent/30 transition-colors text-sidebar-foreground/50 hover:text-sidebar-foreground" aria-label="Settings">
-            <Settings className="h-4 w-4" />
-          </button>
+            {/* Action Buttons: Nổi bật và chuyên nghiệp */}
+            <div className="px-4 py-4">
+                <button
+                    onClick={newChat}
+                    className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-bold text-white transition-all active:scale-95 shadow-md bg-sidebar-primary hover:opacity-95`}
+                >
+                    <Plus className="h-4 w-4 stroke-[3px]" />
+                    <span>Bắt đầu trò chuyện</span>
+                </button>
+            </div>
+
+            {/* History Section: Danh sách lịch sử cuộn mượt */}
+            <div className="px-4 mb-2 flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-widest text-foreground/30">
+                    Lịch sử gần đây
+                </span>
+                {isSafe && (
+                    <span title="Dữ liệu ẩn danh">
+                        <Ghost className="h-3 w-3 text-rose-300" />
+                    </span>
+                )}
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-3 space-y-1 scrollbar-none">
+                {sessions.length === 0 ? (
+                    <div className="px-4 py-8 text-center border-2 border-dashed border-muted/20 rounded-2xl">
+                        <p className="text-xs text-muted-foreground/60 italic">Chưa có cuộc hội thoại nào</p>
+                    </div>
+                ) : (
+                    sessions.map((session) => {
+                        const isActive = session.id === currentSessionId;
+                        const isEditing = editingId === session.id;
+                        return (
+                            <div
+                                key={session.id}
+                                onMouseEnter={() => setHoveredId(session.id)}
+                                onMouseLeave={() => setHoveredId(null)}
+                                className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm cursor-pointer transition-all duration-300
+                                    ${isActive
+                                        ? "bg-white shadow-sm ring-1 ring-black/5 text-foreground font-semibold"
+                                        : "hover:bg-white/50 text-foreground/60 hover:text-foreground"
+                                    }`}
+                                onClick={() => !isEditing && selectSession(session.id)}
+                            >
+                                <MessageSquare className={`h-4 w-4 shrink-0 ${isActive ? 'text-sidebar-primary' : 'opacity-30'}`} />
+                                {isEditing ? (
+                                    <input
+                                        value={editText}
+                                        onChange={(e) => setEditText(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && confirmEdit()}
+                                        className="flex-1 bg-transparent outline-none border-b border-primary/50"
+                                        autoFocus
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                ) : (
+                                    <span className="flex-1 truncate">{session.title}</span>
+                                )}
+                                {(hoveredId === session.id || isActive) && !isEditing && (
+                                    <div className="flex gap-1 animate-in fade-in zoom-in duration-200">
+                                        <Pencil onClick={(e) => { e.stopPropagation(); startEdit(session.id, session.title); }} className="h-3.5 w-3.5 opacity-40 hover:text-sidebar-primary hover:opacity-100" />
+                                        <Trash2 onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }} className="h-3.5 w-3.5 opacity-40 hover:text-destructive hover:opacity-100" />
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            {/* Privacy Section: Thay thế hoàn toàn phần Profile */}
+            <div className="mt-auto p-4">
+                <div className={`rounded-2xl p-4 border transition-colors duration-500 bg-sidebar-accent/40 border-sidebar-border`}>
+                    <div className="flex items-center gap-2 mb-2">
+                        <Shield className={`h-4 w-4 ${isSafe ? "text-rose-500" : "text-indigo-600"}`} />
+                        <span className="text-xs font-black uppercase tracking-tighter opacity-70">Privacy First</span>
+                    </div>
+                    <p className="text-[10px] leading-relaxed text-muted-foreground font-medium">
+                        Chúng tôi không lưu trữ thông tin cá nhân. Các cuộc trò chuyện được mã hóa và ẩn danh hoàn toàn để bảo vệ bạn.
+                    </p>
+                </div>
+            </div>
+
+            {/* Footer Menu */}
+            <div className="px-3 pb-6 space-y-1">
+                <button className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-bold text-foreground/60 hover:bg-white hover:text-foreground transition-all">
+                    <Settings className="h-4 w-4 opacity-50" />
+                    <span>Cài đặt hệ thống</span>
+                </button>
+                <div className="flex items-center justify-center pt-2 opacity-20 group-hover:opacity-40 transition-opacity">
+                    <span className="text-[9px] font-black tracking-widest uppercase italic">V 1.0.2 • Secure Session</span>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
-};
+    );
+};  
