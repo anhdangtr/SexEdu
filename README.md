@@ -89,8 +89,8 @@ Teenagers aged **13–19**, especially those facing barriers to accessing sensit
 ## How we built SaSe
 
 ### Tech Stack
-- Frontend: TypeScript (React / Next.js)  
-- Backend: Node.js + Express  
+- Frontend: TypeScript, React
+- Backend: Node.js, Express  
 - AI: LLM API with prompt engineering  
 
 ---
