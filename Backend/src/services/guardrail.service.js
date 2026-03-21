@@ -12,9 +12,15 @@ const INPUT_BLOCK_THRESHOLD = 4;
 const OUTPUT_REVIEW_THRESHOLD = 2;
 
 const KEYWORD_PATTERNS = [
-  { pattern: /\brape\b/i, score: 4, tag: "sexual_violence_explicit", action: "block" },
-  { pattern: /\bsexual assault\b/i, score: 4, tag: "sexual_violence_explicit", action: "block" },
-  { pattern: /\bmolest/i, score: 4, tag: "sexual_violence_explicit", action: "block" },
+  { pattern: /\bhow to rape\b/i, score: 5, tag: "harmful_sexual_violence", action: "block" },
+  { pattern: /\brape someone\b/i, score: 5, tag: "harmful_sexual_violence", action: "block" },
+  { pattern: /\bforce someone to have sex\b/i, score: 5, tag: "harmful_sexual_violence", action: "block" },
+  { pattern: /\bhide rape evidence\b/i, score: 5, tag: "harmful_sexual_violence", action: "block" },
+  { pattern: /\bchild porn\b/i, score: 5, tag: "minor_sexual", action: "block" },
+  { pattern: /\bunderage porn\b/i, score: 5, tag: "minor_sexual", action: "block" },
+  { pattern: /\brape\b/i, score: 2, tag: "sexual_violence_context", action: "review" },
+  { pattern: /\bsexual assault\b/i, score: 2, tag: "sexual_violence_context", action: "review" },
+  { pattern: /\bmolest/i, score: 2, tag: "sexual_violence_context", action: "review" },
   { pattern: /\bunderage\b/i, score: 3, tag: "minor_signal", action: "review" },
   { pattern: /\bminor\b/i, score: 2, tag: "minor_signal", action: "review" },
   { pattern: /\bteen\b/i, score: 1, tag: "minor_signal", action: "review" },
@@ -32,20 +38,24 @@ const KEYWORD_PATTERNS = [
 
 const SAFE_REDIRECT_MESSAGES = {
   minor_sexual:
-    "Minh khong the ho tro noi dung tinh duc lien quan den tre vi thanh nien. Neu ban can thong tin giao duc gioi tinh an toan, minh co the giai thich o muc do phu hop va khoa hoc.",
+    "I can't help with sexual content involving minors. If you need safe, age-appropriate sex education information, I can explain it in a scientific and appropriate way.",
   coercion_intimacy:
-    "Minh khong the ho tro noi dung lien quan den ep buoc trong su than mat. Neu ban dang o tinh huong khong an toan, hay tim nguoi dang tin cay hoac dich vu ho tro khan cap tai noi ban song.",
+    "I can't help with content involving coercion or forced intimacy. If you are in an unsafe situation, please reach out to a trusted person or an emergency support service in your area.",
   partner_violence:
-    "Minh khong the huong dan noi dung co yeu to bao luc trong moi quan he. Neu ban dang gap nguy hiem, hay uu tien an toan va tim ho tro tu nguoi than, co quan dia phuong hoac duong day khan cap.",
+    "I can't provide guidance that involves violence in a relationship. If you are in danger, please prioritize your safety and seek help from someone you trust, local services, or an emergency hotline.",
+  harmful_sexual_violence:
+    "I can't help with requests involving coercion or sexual violence. If you want information about consent, safety, or how to get help, I can support that.",
   explicit_sexual_content:
-    "Minh khong the ho tro noi dung tinh duc qua muc an toan. Minh co the giup theo huong giao duc suc khoe, dong thuan va an toan.",
+    "I can't help with sexual content that goes beyond safe educational limits. I can still help from a health, consent, and safety perspective.",
+  victim_support:
+    "If you are dealing with assault or an unsafe situation, please get to a safe place, reach out to someone you trust, and contact medical or emergency support in your area if needed.",
   unsafe:
-    "Cau hoi nay khong phu hop de tra loi theo cach hien tai. Hay hoi theo huong giao duc, an toan va ton trong hon.",
+    "This question is not appropriate to answer in its current form. Please ask it in a safer, more educational, and respectful way.",
 };
 
 const OUTPUT_REDIRECT_MESSAGES = {
   unsafe_output:
-    "Minh se tra loi theo huong an toan hon. Ban co the hoi lai theo cach giao duc, ton trong va tap trung vao suc khoe.",
+    "I'll answer in a safer way. You can also ask again using a more educational, respectful, and health-focused framing.",
 };
 
 const buildKeywordSignals = (message) => {
@@ -68,6 +78,7 @@ const buildKeywordSignals = (message) => {
 const sumRisk = (signals) => signals.reduce((total, signal) => total + signal.score, 0);
 
 const hasHardBlock = (signals) => signals.some((signal) => signal.action === "block");
+const hasVictimSupportSignal = (signals) => signals.some((signal) => signal.tag === "victim_support");
 
 const buildResult = ({
   decision,
@@ -101,7 +112,7 @@ export const evaluateInputGuardrail = async (message, context = {}) => {
 
   let result;
 
-  if (hasHardBlock(signals) || score >= INPUT_BLOCK_THRESHOLD) {
+  if (hasHardBlock(signals)) {
     const hardSignal = signals.find((signal) => signal.action === "block") ?? signals[0];
     result = buildResult({
       decision: "block",
@@ -109,6 +120,21 @@ export const evaluateInputGuardrail = async (message, context = {}) => {
       score,
       signals,
       safeReply: SAFE_REDIRECT_MESSAGES[hardSignal?.tag] ?? SAFE_REDIRECT_MESSAGES.unsafe,
+    });
+  } else if (hasVictimSupportSignal(signals)) {
+    result = buildResult({
+      decision: "allow",
+      reason: "victim_support",
+      score,
+      signals,
+    });
+  } else if (score >= INPUT_BLOCK_THRESHOLD && context.intent === "harmful_request") {
+    result = buildResult({
+      decision: "block",
+      reason: "harmful_sexual_violence",
+      score,
+      signals,
+      safeReply: SAFE_REDIRECT_MESSAGES.harmful_sexual_violence,
     });
   } else if (score < INPUT_REVIEW_THRESHOLD) {
     result = buildResult({
@@ -181,7 +207,7 @@ export const evaluateOutputGuardrail = async ({ userMessage, assistantReply, sou
   const outputSignals = buildKeywordSignals(normalizedReply);
   const score = sumRisk(outputSignals);
 
-  if (hasHardBlock(outputSignals)) {
+  if (hasHardBlock(outputSignals) && intent !== "support_or_safety" && intent !== "education") {
     const hardSignal = outputSignals.find((signal) => signal.action === "block");
     return buildResult({
       decision: "redirect",

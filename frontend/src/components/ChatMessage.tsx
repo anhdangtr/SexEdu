@@ -100,10 +100,21 @@ export const ChatMessage = ({ role, content, index }: ChatMessageProps) => {
     const isSafe = mode === "safe";
     const isTheoryCardStyle = isAssistant && isSafe;
 
+    const formatMathContent = (text: string) => {
+        if (!text) return "";
+
+        return text
+            .replace(/\\\[([\s\S]*?)\\\]/g, (_, eq) => `\n$$\n${eq.trim()}\n$$\n`)
+            .replace(/\\\(([\s\S]*?)\\\)/g, (_, eq) => `$${eq.trim()}$`)
+            .replace(/\$\s+/g, "$")
+            .replace(/\s+\$/g, "$");
+    };
+
     const theme = {
         primary: "bg-rose-500",
         userBubble: "bg-gradient-to-br from-rose-500 to-fuchsia-600 shadow-rose-200",
         aiBubble: "bg-white border-rose-100 shadow-sm",
+        textAi: "text-rose-600",
         label: "text-rose-500/40",
     };
 

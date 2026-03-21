@@ -31,15 +31,72 @@ const parseClassifierResponse = (content) => {
   }
 };
 
+const SENSITIVE_INTENTS = new Set([
+  "support_or_safety",
+  "sexual_explicit_request",
+  "harmful_request",
+]);
+
+const RESPONSE_FORMAT_RULES = [
+  "Format every answer in clean Markdown that is easy to scan on mobile.",
+  "Use short paragraphs with blank lines between sections.",
+  "Use short section headers like **Possible Reasons**, **What To Do Now**, or **Get Help Now** when useful.",
+  "Use bullet lists for warning signs, common causes, and next steps.",
+  "Keep each bullet focused on one idea.",
+  "Do not use emojis.",
+  "Do not write long dense paragraphs.",
+].join(" ");
+
+const SYMPTOM_RESPONSE_RULES = [
+  "For symptom or body-change questions, use this structure when relevant:",
+  "1. one brief reassuring sentence with uncertainty",
+  "2. a short **Possible Reasons** section",
+  "3. a short **When To Be Careful** or **Get Help Now** section if warning signs exist",
+  "4. a short **What You Can Do Now** section",
+  "5. end with at most 2 or 3 relevant follow-up questions",
+].join(" ");
+
+const buildSystemPrompt = (intent) => {
+  if (!SENSITIVE_INTENTS.has(intent)) {
+    return [
+      "You are a safe and educational sex education assistant.",
+      `Treat the likely intent as: ${intent}.`,
+      "Answer concisely in a factual, non-graphic, educational way.",
+      "Focus on health, consent, safety, prevention, and emotional support when relevant.",
+      "If the user asks something unsafe, refuse briefly and redirect to safe education.",
+      RESPONSE_FORMAT_RULES,
+      SYMPTOM_RESPONSE_RULES,
+    ].join(" ");
+  }
+
+  return [
+    "You are a safe and educational sex education assistant handling a sensitive request.",
+    `Treat the likely intent as: ${intent}.`,
+    "Before answering, silently classify the request into one of these buckets: education, support_or_safety, sexual_explicit_request, harmful_request, unclear.",
+    "If the request is education, answer clearly in a concise and educational way.",
+    "If the request is support_or_safety, answer supportively, prioritize immediate safety, medical care, trusted support, and non-judgmental guidance.",
+    "If the request is sexual_explicit_request, do not provide erotic or graphic detail; instead redirect to health, consent, boundaries, and safety.",
+    "If the request is harmful_request, refuse briefly and redirect to consent, safety, and respect.",
+    "If the request is unclear, answer briefly in a safe, non-explicit way.",
+    "Never provide instructions for rape, coercion, abuse, sexual exploitation, or avoiding accountability.",
+    "Do not be sexually graphic. Keep the answer focused on health, consent, safety, and age-appropriate education.",
+    "If the user appears to be a victim or asks what to do after assault or abuse, do not refuse. Offer supportive, practical, safety-focused guidance.",
+    RESPONSE_FORMAT_RULES,
+    SYMPTOM_RESPONSE_RULES,
+  ].join(" ");
+};
+
 export const callLLM = async (message, intent) => {
   const apiKey = getApiKey();
 
   if (!apiKey) {
     console.warn("OPENAI_API_KEY is missing. Skipping OpenAI request.");
-    return "He thong AI chua duoc cau hinh khoa API. Hay them OPENAI_API_KEY vao backend.";
+    return "The AI system is not configured with an API key yet. Please add OPENAI_API_KEY to the backend.";
   }
 
   try {
+    const systemPrompt = buildSystemPrompt(intent);
+
     const res = await axios.post(
       OPENAI_API_URL,
       {
@@ -48,7 +105,7 @@ export const callLLM = async (message, intent) => {
         messages: [
           {
             role: "system",
-            content: `You are a safe and educational sex education assistant. The detected intent is: ${intent}. Give concise, educational, non-explicit answers focused on health, consent, and safety.`,
+            content: systemPrompt,
           },
           {
             role: "user",
@@ -59,7 +116,7 @@ export const callLLM = async (message, intent) => {
       getRequestConfig(apiKey)
     );
 
-    return res.data.choices[0]?.message?.content ?? "Minh chua nhan duoc noi dung phan hoi tu AI.";
+    return res.data.choices[0]?.message?.content ?? "I did not receive a response from the AI.";
   } catch (err) {
     const status = err.response?.status;
     const apiError = err.response?.data?.error?.message;
@@ -67,10 +124,10 @@ export const callLLM = async (message, intent) => {
     console.error("OpenAI request failed:", status ?? err.code ?? err.message, apiError ?? "");
 
     if (status === 401) {
-      return "Khoa API OpenAI khong hop le hoac da het han. Hay kiem tra OPENAI_API_KEY cua backend.";
+      return "The OpenAI API key is invalid or expired. Please check the backend OPENAI_API_KEY.";
     }
 
-    return "AI dang ban hoac chua san sang. Thu lai sau nhe!";
+    return "The AI is busy or temporarily unavailable. Please try again shortly.";
   }
 };
 
@@ -87,16 +144,17 @@ export const callGuardrailClassifier = async ({ stage, payload }) => {
           "You are a safety guardrail classifier for sex education.",
           "Return JSON only with keys: decision, reason.",
           'Valid decisions: "allow", "block", "redirect", "review".',
-          "Block clear unsafe content involving minors and sexual content, coercion with intimacy, or explicit violent sexual harm.",
-          "Redirect cases involving partner violence or coercion toward safety-oriented support.",
-          "Allow educational, medical, consent, puberty, contraception, and STI questions when not unsafe.",
+          "Block only clear harmful requests involving minors and sexual content, coercion for sexual access, rape instructions, or avoiding evidence/accountability.",
+          "Allow and do not block victim-support requests such as asking what to do after rape, assault, abuse, or coercion.",
+          "Redirect explicit erotic sexual requests toward safe educational framing.",
+          "Allow educational, medical, consent, puberty, contraception, STI, pregnancy, and safety questions when they are not harmful.",
         ].join(" ")
       : [
           "You are a safety guardrail classifier reviewing an assistant answer.",
           "Return JSON only with keys: decision, reason.",
           'Valid decisions: "allow", "block", "redirect", "review".',
-          "Reject outputs that are explicit, unsafe, or give harmful sexual guidance.",
-          "Allow concise educational and safety-focused outputs.",
+          "Reject outputs that are sexually graphic, unsafe, or give harmful sexual guidance.",
+          "Allow concise educational outputs and supportive victim-safety guidance even when they mention rape or assault in a non-graphic way.",
         ].join(" ");
 
   try {
