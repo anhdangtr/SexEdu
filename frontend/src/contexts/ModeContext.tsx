@@ -46,7 +46,7 @@ function createSession(mode: AppMode): ChatSession {
     id: crypto.randomUUID(),
     // Use a single, neutral default title for both modes so switching doesn't
     // change the session name unexpectedly.
-    title: "Cuộc trò chuyện mới",
+      title: "New Conversation",
     messages: [],
     createdAt: new Date(),
     mode,

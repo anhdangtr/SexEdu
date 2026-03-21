@@ -103,20 +103,9 @@ $$
 
 ---
 
-### Guardrail Workflow
+### Core Backend workflow - Guardrail 
 
 <img width="2313" height="2702" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/fdffaa53-79c9-441a-aef0-f40551be84c9" />
-
----
-
-### Guardrail Layers
-
-- Normalize input  
-- Detect sensitive keywords  
-- Apply rule-based safety  
-- Score risk level  
-- Use AI for ambiguous cases  
-- Cache results for efficiency  
 
 ---
 
