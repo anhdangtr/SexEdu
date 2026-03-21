@@ -114,6 +114,7 @@ User Input
 → LLM
 → Output Guardrail 
 
+<img width="2313" height="2702" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/fdffaa53-79c9-441a-aef0-f40551be84c9" />
 
 ---
 
