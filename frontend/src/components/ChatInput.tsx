@@ -16,14 +16,14 @@ export const ChatInput = ({ onSend, disabled, isGenerating, onStop }: ChatInputP
     const inputRef = useRef<HTMLTextAreaElement>(null);
 
     const isSafe = mode === "safe";
-
     const placeholder = isSafe
-        ? "Share a private thought or a health question with EduSolve..."
-        : "Enter a math problem, equation, or step-by-step request...";
+        ? "Ask a private question about puberty, consent, relationships, or sexual health..."
+        : "Enter a math problem, equation, or concept for step-by-step help...";
 
     const handleSubmit = () => {
         const trimmed = text.trim();
         if (!trimmed || disabled || isGenerating) return;
+
         onSend(trimmed);
         setText("");
 
@@ -52,16 +52,18 @@ export const ChatInput = ({ onSend, disabled, isGenerating, onStop }: ChatInputP
     }, [mode, isGenerating]);
 
     return (
-        <div className="relative w-full max-w-4xl mx-auto transition-all duration-300">
-            <div className={cn(
-                "group relative flex flex-col w-full rounded-2xl border bg-card/80 backdrop-blur-sm transition-all duration-200 shadow-sm",
-                "focus-within:shadow-md focus-within:border-primary/40 focus-within:ring-1 focus-within:ring-primary/20",
-                disabled && "opacity-60 bg-muted"
-            )}>
+        <div className="relative mx-auto w-full max-w-4xl transition-all duration-300">
+            <div
+                className={cn(
+                    "group relative flex w-full flex-col rounded-2xl border bg-card/80 backdrop-blur-sm transition-all duration-200 shadow-sm",
+                    "focus-within:border-primary/40 focus-within:shadow-md focus-within:ring-1 focus-within:ring-primary/20",
+                    disabled && "bg-muted opacity-60"
+                )}
+            >
                 <div className="flex items-end gap-2 px-3 py-3">
                     <button
                         type="button"
-                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all active:scale-90"
+                        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-primary/10 hover:text-primary active:scale-90"
                         title="Upload a file or image"
                     >
                         <Paperclip className="h-5 w-5" />
@@ -75,14 +77,14 @@ export const ChatInput = ({ onSend, disabled, isGenerating, onStop }: ChatInputP
                         placeholder={placeholder}
                         disabled={disabled}
                         rows={1}
-                        className="flex-1 min-h-[40px] max-h-[200px] resize-none bg-transparent px-2 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed leading-relaxed font-sans"
+                        className="min-h-[40px] max-h-[200px] flex-1 resize-none bg-transparent px-2 py-2 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed font-sans"
                     />
 
                     <div className="flex items-center gap-1.5 pb-0.5">
                         {!text && (
                             <button
                                 type="button"
-                                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground transition-colors"
+                                className="hidden h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:text-foreground sm:flex"
                             >
                                 <Smile className="h-5 w-5" />
                             </button>
@@ -91,7 +93,7 @@ export const ChatInput = ({ onSend, disabled, isGenerating, onStop }: ChatInputP
                         {!text && !isGenerating && (
                             <button
                                 type="button"
-                                className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-all hover:bg-primary/10 hover:text-primary"
                                 title="Voice input"
                             >
                                 <Mic className="h-5 w-5" />
@@ -101,8 +103,8 @@ export const ChatInput = ({ onSend, disabled, isGenerating, onStop }: ChatInputP
                         {isGenerating ? (
                             <button
                                 onClick={onStop}
-                                className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground text-background hover:opacity-90 transition-all animate-in zoom-in"
-                                title="Stop response"
+                                className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground text-background transition-all animate-in zoom-in hover:opacity-90"
+                                title="Stop generating"
                             >
                                 <Square className="h-4 w-4 fill-current" />
                             </button>
@@ -111,9 +113,9 @@ export const ChatInput = ({ onSend, disabled, isGenerating, onStop }: ChatInputP
                                 onClick={handleSubmit}
                                 disabled={!text.trim() || disabled}
                                 className={cn(
-                                    "flex h-9 w-9 items-center justify-center rounded-xl transition-all active:scale-90 shadow-sm",
+                                    "flex h-9 w-9 items-center justify-center rounded-xl shadow-sm transition-all active:scale-90",
                                     text.trim()
-                                        ? "bg-primary text-primary-foreground hover:shadow-primary/20 hover:shadow-lg"
+                                        ? "bg-primary text-primary-foreground hover:shadow-lg hover:shadow-primary/20"
                                         : "bg-muted text-muted-foreground opacity-50"
                                 )}
                                 title="Send message"
@@ -124,13 +126,13 @@ export const ChatInput = ({ onSend, disabled, isGenerating, onStop }: ChatInputP
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between px-4 pb-2 text-[10px] text-muted-foreground/50 font-medium select-none">
+                <div className="flex select-none items-center justify-between px-4 pb-2 text-[10px] font-medium text-muted-foreground/50">
                     <div className="flex items-center gap-1">
                         <Sparkles className="h-3 w-3" />
-                        <span>EduSolve AI Pro</span>
+                        <span>{isSafe ? "SafeSpace AI" : "Study Solver AI"}</span>
                     </div>
                     <div className="hidden sm:block">
-                        Use <span className="px-1 py-0.5 rounded border border-border bg-muted/50">Shift + Enter</span> for a new line
+                        Use <span className="rounded border border-border bg-muted/50 px-1 py-0.5">Shift + Enter</span> for a new line
                     </div>
                 </div>
             </div>
