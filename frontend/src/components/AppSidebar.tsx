@@ -11,25 +11,32 @@ const Plus = (p: any) => <Svg {...p}><path d="M12 5v14M5 12h14" /></Svg>;
 const MessageSquare = (p: any) => <Svg {...p}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></Svg>;
 const Pencil = (p: any) => <Svg {...p}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /></Svg>;
 const Trash2 = (p: any) => <Svg {...p}><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></Svg>;
-const Check = (p: any) => <Svg {...p}><polyline points="20 6 9 17 4 12" /></Svg>; // Thêm icon xác nhận
+const Check = (p: any) => <Svg {...p}><polyline points="20 6 9 17 4 12" /></Svg>;
 const ChevronRight = (p: any) => <Svg {...p}><path d="M9 6l6 6-6 6" /></Svg>;
 
 export const AppSidebar = () => {
-    // Lưu ý: Đảm bảo useMode có hàm cập nhật title (ví dụ: renameSession)
-    const { mode, currentSessionId, newChat, selectSession, deleteSession, toggleMode, safeSessions, disguiseSessions, renameSession } = useMode();
+    const {
+        mode,
+        currentSessionId,
+        newChat,
+        selectSession,
+        deleteSession,
+        toggleMode,
+        safeSessions,
+        disguiseSessions,
+        renameSession
+    } = useMode();
+
     const isSafe = mode === "safe";
     const sessions = isSafe ? safeSessions : disguiseSessions;
 
     const theme = {
         primary: "bg-rose-500 shadow-xl shadow-rose-200",
         text: "text-rose-600",
-        bg: "bg-[#fffcfc]",
         active: "bg-white shadow-sm ring-1 ring-rose-100/50",
     };
 
     const [hoveredId, setHoveredId] = useState<string | null>(null);
-    
-    // Logic đổi tên thực tế
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +49,7 @@ export const AppSidebar = () => {
     }, [editingId]);
 
     const handleStartEdit = (e: React.MouseEvent, id: string, title: string) => {
-        e.stopPropagation(); // Ngăn việc chọn session khi nhấn nút sửa
+        e.stopPropagation();
         setEditingId(id);
         setEditValue(title);
     };
@@ -50,17 +57,16 @@ export const AppSidebar = () => {
     const handleSaveEdit = (e?: React.FormEvent | React.FocusEvent) => {
         if (e) e.stopPropagation();
         if (editingId && editValue.trim()) {
-            // Gọi hàm rename từ Context của bạn
-            if (renameSession) {
-                renameSession(editingId, editValue.trim());
-            }
+            if (renameSession) renameSession(editingId, editValue.trim());
         }
         setEditingId(null);
     };
 
     return (
-        <div className={`flex h-full w-[290px] flex-col transition-all duration-700 ease-in-out border-r shadow-[20px_0_40px_rgba(0,0,0,0.02)] ${theme.bg}`}>
-            <div className="group px-8 pt-10 pb-8 cursor-pointer" onDoubleClick={toggleMode}>
+        <div className="flex h-full w-[290px] flex-col border-r bg-[#fffcfc] shadow-[20px_0_40px_rgba(0,0,0,0.02)]">
+
+            {/* Header Area */}
+            <div className="group px-8 pt-10 pb-8 cursor-pointer select-none" onDoubleClick={toggleMode}>
                 <div className="flex justify-center">
                     <img
                         src={logoUrl}
@@ -73,6 +79,7 @@ export const AppSidebar = () => {
                 </span>
             </div>
 
+            {/* New Chat Button */}
             <div className="px-6 mb-8">
                 <button onClick={newChat} className={`group flex w-full items-center justify-between rounded-[1.25rem] px-5 py-4 text-[13px] font-bold text-white transition-all hover:brightness-105 hover:-translate-y-0.5 active:scale-95 ${theme.primary}`}>
                     <div className="flex items-center gap-3">
@@ -85,11 +92,13 @@ export const AppSidebar = () => {
                 </button>
             </div>
 
+            {/* Label History */}
             <div className="px-8 mb-4 flex items-center justify-between">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Recent Chats</span>
                 <div className="h-[1px] flex-1 ml-4 bg-gradient-to-r from-rose-100/50 to-transparent" />
             </div>
 
+            {/* Chat List */}
             <div className="flex-1 overflow-y-auto px-4 space-y-2 scrollbar-none">
                 {sessions.length === 0 ? (
                     <div className="mt-10 flex flex-col items-center py-12 border border-dashed border-rose-100 rounded-[2rem] opacity-20 mx-4">
@@ -107,9 +116,8 @@ export const AppSidebar = () => {
                                 onMouseEnter={() => setHoveredId(session.id)}
                                 onMouseLeave={() => setHoveredId(null)}
                                 onClick={() => !isEditing && selectSession(session.id)}
-                                className={`group relative flex items-center gap-3 rounded-2xl px-4 py-3.5 text-[13px] transition-all duration-300 cursor-pointer ${
-                                    isActive ? `${theme.active} text-slate-900` : "text-slate-500 hover:bg-white/60 hover:text-slate-800"
-                                }`}
+                                className={`group relative flex items-center gap-3 rounded-2xl px-4 py-3.5 text-[13px] transition-all duration-300 cursor-pointer ${isActive ? `${theme.active} text-slate-900` : "text-slate-500 hover:bg-white/60 hover:text-slate-800"
+                                    }`}
                             >
                                 <div className={`p-2 rounded-xl transition-colors ${isActive ? "bg-rose-50 text-rose-500" : "bg-transparent opacity-30 group-hover:opacity-100"}`}>
                                     <MessageSquare className="h-3.5 w-3.5" />
@@ -136,10 +144,7 @@ export const AppSidebar = () => {
                                         {isEditing ? (
                                             <button onClick={handleSaveEdit} className="p-1 text-green-500"><Check className="h-3.5 w-3.5" /></button>
                                         ) : (
-                                            <button 
-                                                onClick={(e) => handleStartEdit(e, session.id, session.title)} 
-                                                className="p-1 hover:text-rose-500 transition-colors"
-                                            >
+                                            <button onClick={(e) => handleStartEdit(e, session.id, session.title)} className="p-1 hover:text-rose-500 transition-colors">
                                                 <Pencil className="h-3.5 w-3.5 opacity-50 hover:opacity-100" />
                                             </button>
                                         )}
@@ -155,17 +160,18 @@ export const AppSidebar = () => {
                 )}
             </div>
 
+            {/* Bottom Footer Box - Căn lề đều và 2 hàng cố định */}
             <div className="px-6 pb-8">
-                <div className="rounded-[1.9rem] border border-rose-100/70 bg-white/80 px-4 py-4 shadow-[0_10px_30px_rgba(244,63,94,0.06)] backdrop-blur-xl transition-all duration-500">
-                    <div className="flex items-center gap-4">
-                        <div className="flex h-[3.4rem] w-[3.4rem] shrink-0 items-center justify-center">
-                            <img src={logoUrl} alt="Sidebar logo" className="h-auto w-[46px] object-contain" />
+                <div className="rounded-[2.2rem] border border-rose-100/70 bg-white/80 p-5 shadow-[0_10px_30px_rgba(244,63,94,0.06)] backdrop-blur-xl">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50">
+                            <img src={logoUrl} alt="Sidebar logo" className="h-7 w-7 object-contain" />
                         </div>
-                        <div className="min-w-0 flex-1">
-                            <p className="text-[10px] leading-[1.55] text-justify text-slate-500 font-bold tracking-tight [text-justify:inter-word] opacity-80">
+                        <div className="w-full">
+                            <p className="text-[10px] leading-[1.6] text-center text-slate-500 font-bold tracking-tight opacity-80 px-1">
                                 {isSafe
-                                    ? "Private support for puberty, consent, relationships, and health questions."
-                                    : "A discreet math assistant for equations, homework, and guided solutions."}
+                                    ? <>Private support for health, puberty,<br />consent and your relationships.</>
+                                    : <>Discreet math assistant for equations,<br />homework and guided solutions.</>}
                             </p>
                         </div>
                     </div>

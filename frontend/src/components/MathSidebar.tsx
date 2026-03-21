@@ -70,7 +70,7 @@ export const MathSidebar = () => {
     };
 
     return (
-        <div className="flex flex-col gap-6 p-5 animate-in slide-in-from-right duration-700 h-full font-chakra">
+        <div className="flex h-full flex-col gap-6 p-5 font-chakra">
 
             {/* 1. ACADEMIC CALCULATOR ENGINE */}
             <div className="rounded-3xl border border-rose-100 bg-white/60 p-4 shadow-xl shadow-rose-100/10 backdrop-blur-md">
