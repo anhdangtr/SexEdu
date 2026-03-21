@@ -44,7 +44,9 @@ export const useMode = () => {
 function createSession(mode: AppMode): ChatSession {
   return {
     id: crypto.randomUUID(),
-    title: mode === "safe" ? "Cuộc trò chuyện mới" : "Phiên học mới",
+    // Use a single, neutral default title for both modes so switching doesn't
+    // change the session name unexpectedly.
+    title: "Cuộc trò chuyện mới",
     messages: [],
     createdAt: new Date(),
     mode,
