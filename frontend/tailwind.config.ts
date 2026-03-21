@@ -19,9 +19,11 @@ export default {
         },
         extend: {
             fontFamily: {
-                // Thiết lập Plus Jakarta Sans làm font sans-serif mặc định
+                // Font chữ Outfit cho thương hiệu Xaxi năng động
+                outfit: ["'Outfit'", "sans-serif"],
+                // Giữ lại Plus Jakarta Sans cho văn bản thông thường
                 sans: ["'Plus Jakarta Sans'", "ui-sans-serif", "system-ui", "sans-serif"],
-                // Giữ lại JetBrains Mono cho các thành phần tính toán/code
+                // Font Mono cho tính toán và code
                 mono: ["'JetBrains Mono'", "ui-monospace", "SFMono-Regular", "monospace"],
             },
             colors: {

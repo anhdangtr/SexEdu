@@ -1,84 +1,111 @@
 import { useMode } from "@/contexts/ModeContext";
-import { Shield, Sigma } from "lucide-react";
+import { Shield, Sigma, User, BotMessageSquare } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface ChatMessageProps {
-  role: "user" | "assistant";
-  content: string;
-  index: number;
+    role: "user" | "assistant";
+    content: string;
+    index: number;
 }
 
 export const ChatMessage = ({ role, content, index }: ChatMessageProps) => {
-  const { mode } = useMode();
-  const isUser = role === "user";
-  const isSafe = mode === "safe";
+    const { mode } = useMode();
+    const isAssistant = role === "assistant";
+    const isSafe = mode === "safe";
 
-  if (isUser) {
+    // --- HÀM FIX CÔNG THỨC MẠNH MẼ ---
+    const formatMathContent = (text: string) => {
+        if (!text) return "";
+        return text
+            // Chuyển đổi các định dạng phổ biến của AI về chuẩn KaTeX
+            .replace(/\\\[/g, '$$$')
+            .replace(/\\\]/g, '$$$')
+            .replace(/\\\(/g, '$')
+            .replace(/\\\)/g, '$')
+            // Xử lý trường hợp AI dùng [ ] hoặc ( ) đơn thuần ở đầu dòng cho toán học
+            .replace(/^\s*\[/gm, '$$$')
+            .replace(/\]\s*$/gm, '$$$')
+            .replace(/^\s*\(/gm, '$')
+            .replace(/\)\s*$/gm, '$');
+    };
+
+    // Hệ thống màu Xaxi Rose
+    const theme = {
+        primary: "bg-rose-500",
+        userBubble: "bg-gradient-to-br from-rose-500 to-fuchsia-500 shadow-rose-200",
+        aiBubble: "bg-white border-rose-100/50 shadow-sm",
+        textAi: "text-rose-600",
+        label: "text-rose-500/40"
+    };
+
     return (
-      <div
-        className="flex justify-end animate-fade-in-up"
-        style={{ animationDelay: `${Math.min(index * 40, 200)}ms` }}
-      >
-        <div className="max-w-[80%] sm:max-w-[65%] chat-bubble user-bubble rounded-2xl rounded-br-md px-4 py-3 mode-transition">
-          {content}
+        <div
+            className={`flex w-full mb-10 gap-3 animate-in fade-in slide-in-from-bottom-5 duration-700 ${isAssistant ? "justify-start" : "justify-end"
+                }`}
+            style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
+        >
+            {/* Cấu trúc đối xứng hoàn hảo */}
+            <div className={`flex max-w-[85%] sm:max-w-[80%] gap-3 ${isAssistant ? "flex-row" : "flex-row-reverse"}`}>
+
+                {/* Avatar Xaxi / User */}
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl shadow-lg transition-all duration-500
+                    ${isAssistant ? "bg-white border border-rose-100/50" : theme.primary}`}>
+                    {isAssistant ? (
+                        isSafe ? <Shield className="h-5 w-5 text-rose-500" /> : <Sigma className="h-5 w-5 text-rose-500" />
+                    ) : (
+                        <User className="h-5 w-5 text-white" />
+                    )}
+                </div>
+
+                {/* Bubble Content Area */}
+                <div className={`flex flex-col ${isAssistant ? "items-start" : "items-end"}`}>
+
+                    {/* Nhãn tên dùng Font Outfit thanh lịch */}
+                    <div className="flex items-center gap-1.5 mb-2 px-1">
+                        <span className={`text-[10px] font-outfit font-black uppercase tracking-[0.2em] ${theme.label}`}>
+                            {isAssistant ? (isSafe ? "Sase Health AI" : "Sase Academic AI") : "Bạn"}
+                        </span>
+                    </div>
+
+                    {/* Chat Bubble - Font Chakra cho cảm giác Tech */}
+                    <div className={`relative px-6 py-4 rounded-[2rem] border transition-all duration-500
+                        ${isAssistant
+                            ? `${theme.aiBubble} text-foreground/90 rounded-tl-none`
+                            : `${theme.userBubble} text-white border-transparent rounded-tr-none shadow-xl`
+                        }`}>
+
+                        <div className={`prose prose-sm max-w-none break-words leading-relaxed font-chakra
+                            ${isAssistant ? "prose-rose text-foreground/90" : "prose-invert text-white"}`}>
+                            <ReactMarkdown
+                                remarkPlugins={[remarkMath]}
+                                rehypePlugins={[rehypeKatex]}
+                                components={{
+                                    p: ({ children }) => <p className="mb-3 last:mb-0 tracking-tight">{children}</p>,
+                                    h3: ({ children }) => (
+                                        <h3 className={`text-sm font-bold uppercase mt-4 mb-2 tracking-widest ${isAssistant ? theme.textAi : "text-white"}`}>
+                                            {children}
+                                        </h3>
+                                    ),
+                                    // Highlight cho các công thức toán học hiển thị
+                                    div: ({ node, ...props }) => {
+                                        if (node?.tagName === 'div' && (props as any).className?.includes('math-display')) {
+                                            return <div className="overflow-x-auto py-3 my-4 bg-rose-50/50 rounded-2xl border border-rose-100/30" {...props} />
+                                        }
+                                        return <div {...props} />
+                                    },
+                                    strong: ({ children }) => <strong className={`font-black ${isAssistant ? theme.textAi : "text-white"}`}>{children}</strong>,
+                                    code: ({ children }) => <code className="bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded-md text-xs font-mono">{children}</code>
+                                }}
+                            >
+                                {formatMathContent(content)}
+                            </ReactMarkdown>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     );
-  }
-
-  return (
-    <div
-      className="flex gap-3 animate-fade-in-up"
-      style={{ animationDelay: `${Math.min(index * 40, 200)}ms` }}
-    >
-      {/* AI Avatar */}
-      <div className="chat-avatar mt-0.5 shrink-0">
-        {isSafe ? (
-          <Shield className="h-4 w-4" />
-        ) : (
-          <Sigma className="h-4 w-4" />
-        )}
-      </div>
-
-      {/* AI Content — polished bubble */}
-      <div className="flex-1 min-w-0">
-        <div className="chat-bubble assistant-bubble rounded-2xl rounded-bl-md px-4 py-3 mode-transition text-sm leading-relaxed text-foreground">
-          {content.split("\n").map((line, i) => {
-          if (line.startsWith("### ")) {
-            return (
-              <h3
-                key={i}
-                className="font-semibold text-primary mt-4 first:mt-0 mb-1.5 text-[13px] uppercase tracking-wide"
-              >
-                {line.replace("### ", "")}
-              </h3>
-            );
-          }
-          if (line.startsWith("**") && line.endsWith("**")) {
-            return (
-              <p key={i} className="font-medium mt-1">
-                {line.replace(/\*\*/g, "")}
-              </p>
-            );
-          }
-          if (line.startsWith("- ")) {
-            return (
-              <li key={i} className="ml-4 list-disc text-[13px] leading-relaxed">
-                {line.replace("- ", "")}
-              </li>
-            );
-          }
-          if (line.trim() === "") return <div key={i} className="h-2" />;
-          if (mode === "disguise" && line.includes("$")) {
-            return (
-              <p key={i} className="font-mono text-accent-foreground">
-                {line}
-              </p>
-            );
-          }
-          return <p key={i}>{line}</p>;
-          })}
-        </div>
-      </div>
-    </div>
-  );
 };
