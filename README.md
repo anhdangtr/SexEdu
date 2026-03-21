@@ -104,15 +104,6 @@ $$
 ---
 
 ### Guardrail Workflow
-User Input
-→ Normalize
-→ Keyword Scan
-→ Rule-Based Safety
-→ Risk Scoring
-→ AI Guardrail
-→ Allow / Block / Redirect
-→ LLM
-→ Output Guardrail 
 
 <img width="2313" height="2702" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/fdffaa53-79c9-441a-aef0-f40551be84c9" />
 
